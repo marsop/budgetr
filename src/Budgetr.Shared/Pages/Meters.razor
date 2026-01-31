@@ -1,0 +1,94 @@
+@page "/meters"
+@using Budgetr.Shared.Models
+@using Budgetr.Shared.Services
+@inject ITimeTrackingService TimeService
+@implements IDisposable
+
+<div class="meters-page">
+    <h2 class="page-title">Meters</h2>
+    
+    <div class="meters-grid">
+        @foreach (var meter in TimeService.Account.Meters.OrderBy(m => m.DisplayOrder))
+        {
+            var isActive = IsActiveMeter(meter.Id);
+            <button class="meter-button @(isActive ? "active" : "") @(meter.Factor >= 0 ? "positive" : "negative")"
+                    @onclick="() => ToggleMeter(meter.Id)">
+                <div class="meter-name">@meter.Name</div>
+                <div class="meter-status">
+                    @if (isActive)
+                    {
+                        <span class="pulse"></span>
+                        <span>Running</span>
+                    }
+                    else
+                    {
+                        <span>Tap to start</span>
+                    }
+                </div>
+            </button>
+        }
+    </div>
+    
+    @if (ActiveEvent != null)
+    {
+        <div class="active-info">
+            <div class="active-duration">
+                <span class="label">Running for:</span>
+                <span class="value">@FormatDuration(ActiveEvent.Duration)</span>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private MeterEvent? ActiveEvent => TimeService.GetActiveEvent();
+    
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        TimeService.OnStateChanged += StateHasChanged;
+        
+        // Update every second to show running duration
+        _timer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+    }
+
+    private bool IsActiveMeter(Guid meterId)
+    {
+        var activeEvent = ActiveEvent;
+        if (activeEvent == null) return false;
+        
+        var meter = TimeService.Account.Meters.FirstOrDefault(m => m.Id == meterId);
+        return meter != null && activeEvent.MeterName == meter.Name;
+    }
+
+    private void ToggleMeter(Guid meterId)
+    {
+        if (IsActiveMeter(meterId))
+        {
+            TimeService.DeactivateMeter();
+        }
+        else
+        {
+            TimeService.ActivateMeter(meterId);
+        }
+    }
+
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+        {
+            return $"{(int)duration.TotalHours}h {duration.Minutes:D2}m {duration.Seconds:D2}s";
+        }
+        return $"{duration.Minutes:D2}m {duration.Seconds:D2}s";
+    }
+
+    public void Dispose()
+    {
+        TimeService.OnStateChanged -= StateHasChanged;
+        _timer?.Dispose();
+    }
+}

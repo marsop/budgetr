@@ -1,0 +1,192 @@
+@page "/timeline"
+@using Budgetr.Shared.Services
+@inject ITimeTrackingService TimeService
+@implements IDisposable
+
+<div class="timeline-page">
+    <h2 class="page-title">Timeline</h2>
+    
+    <div class="period-selector">
+        @foreach (var period in Periods)
+        {
+            <button class="period-button @(SelectedPeriod == period.Value ? "selected" : "")"
+                    @onclick="() => SelectPeriod(period.Value)">
+                @period.Label
+            </button>
+        }
+    </div>
+    
+    <div class="chart-container">
+        @((MarkupString)RenderChart())
+    </div>
+</div>
+
+@code {
+    private record PeriodOption(string Label, TimeSpan Value);
+    
+    private static readonly PeriodOption[] Periods = new[]
+    {
+        new PeriodOption("1h", TimeSpan.FromHours(1)),
+        new PeriodOption("12h", TimeSpan.FromHours(12)),
+        new PeriodOption("24h", TimeSpan.FromHours(24)),
+        new PeriodOption("1w", TimeSpan.FromDays(7))
+    };
+    
+    private TimeSpan SelectedPeriod { get; set; } = TimeSpan.FromHours(24);
+    private List<TimelineDataPoint> DataPoints { get; set; } = new();
+    
+    private double MinY => DataPoints.Count > 0 ? Math.Min(0, DataPoints.Min(p => p.BalanceHours)) : 0;
+    private double MaxY => DataPoints.Count > 0 ? Math.Max(0, DataPoints.Max(p => p.BalanceHours)) : 1;
+    
+    private string GradientColor => DataPoints.LastOrDefault()?.BalanceHours >= 0 ? "#10b981" : "#ef4444";
+    
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        TimeService.OnStateChanged += RefreshData;
+        RefreshData();
+        
+        // Refresh every 5 seconds
+        _timer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                RefreshData();
+                StateHasChanged();
+            });
+        }, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+    }
+
+    private void SelectPeriod(TimeSpan period)
+    {
+        SelectedPeriod = period;
+        RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        DataPoints = TimeService.GetTimelineData(SelectedPeriod);
+    }
+
+    private double GetX(int index)
+    {
+        if (DataPoints.Count <= 1) return 400;
+        return 50 + (index * 700.0 / (DataPoints.Count - 1));
+    }
+
+    private double GetY(double value)
+    {
+        var range = MaxY - MinY;
+        if (range == 0) range = 1;
+        var normalized = (MaxY - value) / range;
+        return 50 + normalized * 300;
+    }
+
+    private string LinePath
+    {
+        get
+        {
+            if (DataPoints.Count < 2) return "";
+            var sb = new System.Text.StringBuilder();
+            sb.Append($"M {GetX(0)} {GetY(DataPoints[0].BalanceHours)}");
+            for (int i = 1; i < DataPoints.Count; i++)
+            {
+                sb.Append($" L {GetX(i)} {GetY(DataPoints[i].BalanceHours)}");
+            }
+            return sb.ToString();
+        }
+    }
+
+    private string AreaPath
+    {
+        get
+        {
+            if (DataPoints.Count < 2) return "";
+            var sb = new System.Text.StringBuilder();
+            sb.Append($"M {GetX(0)} {GetY(0)}");
+            sb.Append($" L {GetX(0)} {GetY(DataPoints[0].BalanceHours)}");
+            for (int i = 1; i < DataPoints.Count; i++)
+            {
+                sb.Append($" L {GetX(i)} {GetY(DataPoints[i].BalanceHours)}");
+            }
+            sb.Append($" L {GetX(DataPoints.Count - 1)} {GetY(0)}");
+            sb.Append(" Z");
+            return sb.ToString();
+        }
+    }
+
+    private string RenderChart()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append(@"<svg viewBox=""0 0 800 400"" class=""timeline-chart"" preserveAspectRatio=""xMidYMid meet"">");
+        
+        if (DataPoints.Count > 1)
+        {
+            // Grid lines
+            sb.Append(@"<g class=""grid-lines"">");
+            for (int i = 0; i <= 4; i++)
+            {
+                var y = 50 + i * 75;
+                sb.Append($@"<line x1=""50"" y1=""{y}"" x2=""750"" y2=""{y}"" stroke=""#333"" stroke-dasharray=""4,4"" />");
+            }
+            sb.Append("</g>");
+            
+            // Y-axis labels
+            sb.Append(@"<g class=""y-labels"">");
+            var range = MaxY - MinY;
+            if (range == 0) range = 1;
+            for (int i = 0; i <= 4; i++)
+            {
+                var value = MaxY - (i * range / 4);
+                var y = 50 + i * 75;
+                sb.Append($@"<text x=""45"" y=""{y + 5}"" text-anchor=""end"" fill=""#888"" font-size=""12"">{value:F1}h</text>");
+            }
+            sb.Append("</g>");
+            
+            // Area fill
+            sb.Append($@"<path d=""{AreaPath}"" fill=""url(#areaGradient)"" opacity=""0.3"" />");
+            
+            // Line
+            sb.Append($@"<path d=""{LinePath}"" fill=""none"" stroke=""url(#lineGradient)"" stroke-width=""3"" />");
+            
+            // Gradient definitions
+            sb.Append($@"<defs>
+                <linearGradient id=""areaGradient"" x1=""0"" x2=""0"" y1=""0"" y2=""1"">
+                    <stop offset=""0%"" stop-color=""{GradientColor}"" stop-opacity=""0.4"" />
+                    <stop offset=""100%"" stop-color=""{GradientColor}"" stop-opacity=""0"" />
+                </linearGradient>
+                <linearGradient id=""lineGradient"" x1=""0"" x2=""1"" y1=""0"" y2=""0"">
+                    <stop offset=""0%"" stop-color=""{GradientColor}"" />
+                    <stop offset=""100%"" stop-color=""{GradientColor}"" />
+                </linearGradient>
+            </defs>");
+            
+            // Current value indicator
+            if (DataPoints.Count > 0)
+            {
+                var lastPoint = DataPoints.Last();
+                var x = GetX(DataPoints.Count - 1);
+                var y = GetY(lastPoint.BalanceHours);
+                var valueText = lastPoint.BalanceHours >= 0 
+                    ? $"+{lastPoint.BalanceHours:F2}h" 
+                    : $"{lastPoint.BalanceHours:F2}h";
+                sb.Append($@"<circle cx=""{x}"" cy=""{y}"" r=""6"" fill=""{GradientColor}"" class=""pulse-circle"" />");
+                sb.Append($@"<text x=""{x}"" y=""{y - 15}"" text-anchor=""middle"" fill=""{GradientColor}"" font-size=""14"" font-weight=""bold"">{valueText}</text>");
+            }
+        }
+        else
+        {
+            sb.Append(@"<text x=""400"" y=""200"" text-anchor=""middle"" fill=""#666"" font-size=""16"">No data for selected period</text>");
+        }
+        
+        sb.Append("</svg>");
+        return sb.ToString();
+    }
+
+    public void Dispose()
+    {
+        TimeService.OnStateChanged -= RefreshData;
+        _timer?.Dispose();
+    }
+}

@@ -1,0 +1,165 @@
+using Budgetr.Shared.Models;
+using System.Text.Json;
+
+namespace Budgetr.Shared.Services;
+
+/// <summary>
+/// Implementation of time tracking service with local storage persistence.
+/// </summary>
+public class TimeTrackingService : ITimeTrackingService
+{
+    private readonly IStorageService _storage;
+    private TimeAccount _account = TimeAccount.CreateDefault();
+    private const string StorageKey = "budgetr_account";
+    
+    public TimeAccount Account => _account;
+    
+    public event Action? OnStateChanged;
+
+    public TimeTrackingService(IStorageService storage)
+    {
+        _storage = storage;
+    }
+
+    public TimeSpan GetCurrentBalance()
+    {
+        return TimeSpan.FromTicks(_account.Events.Sum(e => e.TimeContribution.Ticks));
+    }
+
+    public MeterEvent? GetActiveEvent()
+    {
+        return _account.Events.FirstOrDefault(e => e.IsActive);
+    }
+
+    public void ActivateMeter(Guid meterId)
+    {
+        // First deactivate any active meter
+        DeactivateMeter();
+        
+        var meter = _account.Meters.FirstOrDefault(m => m.Id == meterId);
+        if (meter == null) return;
+        
+        var newEvent = new MeterEvent
+        {
+            StartTime = DateTime.UtcNow,
+            Factor = meter.Factor,
+            MeterName = meter.Name
+        };
+        
+        _account.Events.Add(newEvent);
+        OnStateChanged?.Invoke();
+        _ = SaveAsync();
+    }
+
+    public void DeactivateMeter()
+    {
+        var activeEvent = GetActiveEvent();
+        if (activeEvent != null)
+        {
+            activeEvent.EndTime = DateTime.UtcNow;
+            OnStateChanged?.Invoke();
+            _ = SaveAsync();
+        }
+    }
+
+    public List<TimelineDataPoint> GetTimelineData(TimeSpan period)
+    {
+        var points = new List<TimelineDataPoint>();
+        var endTime = DateTime.UtcNow;
+        var startTime = endTime - period;
+        
+        // Get all events that overlap with the period
+        var relevantEvents = _account.Events
+            .Where(e => e.StartTime <= endTime && (e.EndTime ?? endTime) >= startTime)
+            .OrderBy(e => e.StartTime)
+            .ToList();
+        
+        if (relevantEvents.Count == 0)
+        {
+            // Return just start and end with zero balance
+            points.Add(new TimelineDataPoint { Timestamp = startTime, BalanceHours = 0 });
+            points.Add(new TimelineDataPoint { Timestamp = endTime, BalanceHours = 0 });
+            return points;
+        }
+        
+        // Calculate balance at each event boundary
+        double runningBalance = 0;
+        
+        // Calculate balance before the period starts
+        var eventsBefore = _account.Events
+            .Where(e => e.StartTime < startTime)
+            .ToList();
+        
+        foreach (var evt in eventsBefore)
+        {
+            var effectiveEnd = evt.EndTime ?? startTime;
+            if (effectiveEnd > startTime) effectiveEnd = startTime;
+            var duration = effectiveEnd - evt.StartTime;
+            runningBalance += duration.TotalHours * evt.Factor;
+        }
+        
+        points.Add(new TimelineDataPoint { Timestamp = startTime, BalanceHours = runningBalance });
+        
+        // Add points for each event transition in the period
+        foreach (var evt in relevantEvents)
+        {
+            // Point at start of event
+            if (evt.StartTime >= startTime)
+            {
+                points.Add(new TimelineDataPoint 
+                { 
+                    Timestamp = evt.StartTime, 
+                    BalanceHours = runningBalance 
+                });
+            }
+            
+            // Calculate contribution up to end or now
+            var effectiveStart = evt.StartTime < startTime ? startTime : evt.StartTime;
+            var effectiveEnd = evt.EndTime ?? endTime;
+            if (effectiveEnd > endTime) effectiveEnd = endTime;
+            
+            var contribution = (effectiveEnd - effectiveStart).TotalHours * evt.Factor;
+            runningBalance += contribution;
+            
+            // Point at end of event (or now)
+            if (evt.EndTime.HasValue && evt.EndTime.Value <= endTime)
+            {
+                points.Add(new TimelineDataPoint 
+                { 
+                    Timestamp = evt.EndTime.Value, 
+                    BalanceHours = runningBalance 
+                });
+            }
+        }
+        
+        // Add current point
+        points.Add(new TimelineDataPoint { Timestamp = endTime, BalanceHours = runningBalance });
+        
+        return points.OrderBy(p => p.Timestamp).ToList();
+    }
+
+    public async Task SaveAsync()
+    {
+        var json = JsonSerializer.Serialize(_account);
+        await _storage.SetItemAsync(StorageKey, json);
+    }
+
+    public async Task LoadAsync()
+    {
+        var json = await _storage.GetItemAsync(StorageKey);
+        if (!string.IsNullOrEmpty(json))
+        {
+            var loaded = JsonSerializer.Deserialize<TimeAccount>(json);
+            if (loaded != null)
+            {
+                _account = loaded;
+                // Ensure we have default meters if none exist
+                if (_account.Meters.Count == 0)
+                {
+                    _account.Meters = TimeAccount.CreateDefault().Meters;
+                }
+                OnStateChanged?.Invoke();
+            }
+        }
+    }
+}
