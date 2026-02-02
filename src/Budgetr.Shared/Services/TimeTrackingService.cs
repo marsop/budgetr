@@ -41,7 +41,7 @@ public class TimeTrackingService : ITimeTrackingService
         
         var newEvent = new MeterEvent
         {
-            StartTime = DateTime.UtcNow,
+            StartTime = DateTimeOffset.UtcNow,
             Factor = meter.Factor,
             MeterName = meter.Name
         };
@@ -56,7 +56,7 @@ public class TimeTrackingService : ITimeTrackingService
         var activeEvent = GetActiveEvent();
         if (activeEvent != null)
         {
-            activeEvent.EndTime = DateTime.UtcNow;
+            activeEvent.EndTime = DateTimeOffset.UtcNow;
             OnStateChanged?.Invoke();
             _ = SaveAsync();
         }
@@ -65,7 +65,7 @@ public class TimeTrackingService : ITimeTrackingService
     public List<TimelineDataPoint> GetTimelineData(TimeSpan period)
     {
         var points = new List<TimelineDataPoint>();
-        var endTime = DateTime.UtcNow;
+        var endTime = DateTimeOffset.UtcNow;
         var startTime = endTime - period;
         
         // Get all events that overlap with the period
@@ -74,18 +74,8 @@ public class TimeTrackingService : ITimeTrackingService
             .OrderBy(e => e.StartTime)
             .ToList();
         
-        if (relevantEvents.Count == 0)
-        {
-            // Return just start and end with zero balance
-            points.Add(new TimelineDataPoint { Timestamp = startTime, BalanceHours = 0 });
-            points.Add(new TimelineDataPoint { Timestamp = endTime, BalanceHours = 0 });
-            return points;
-        }
-        
-        // Calculate balance at each event boundary
-        double runningBalance = 0;
-        
         // Calculate balance before the period starts
+        double runningBalance = 0;
         var eventsBefore = _account.Events
             .Where(e => e.StartTime < startTime)
             .ToList();
@@ -98,12 +88,13 @@ public class TimeTrackingService : ITimeTrackingService
             runningBalance += duration.TotalHours * evt.Factor;
         }
         
+        // Always add start point
         points.Add(new TimelineDataPoint { Timestamp = startTime, BalanceHours = runningBalance });
         
         // Add points for each event transition in the period
         foreach (var evt in relevantEvents)
         {
-            // Point at start of event
+            // Point at start of event (before contribution)
             if (evt.StartTime >= startTime)
             {
                 points.Add(new TimelineDataPoint 
@@ -132,7 +123,7 @@ public class TimeTrackingService : ITimeTrackingService
             }
         }
         
-        // Add current point
+        // Always add current point
         points.Add(new TimelineDataPoint { Timestamp = endTime, BalanceHours = runningBalance });
         
         return points.OrderBy(p => p.Timestamp).ToList();

@@ -12,12 +12,12 @@ public class MeterEvent
     /// <summary>
     /// When the meter was activated.
     /// </summary>
-    public DateTime StartTime { get; set; }
+    public DateTimeOffset StartTime { get; set; }
     
     /// <summary>
     /// When the meter was deactivated. Null if still active.
     /// </summary>
-    public DateTime? EndTime { get; set; }
+    public DateTimeOffset? EndTime { get; set; }
     
     /// <summary>
     /// The multiplier for this meter (e.g., 1.0, -1.0, 1.5, -2.0).
@@ -39,7 +39,7 @@ public class MeterEvent
     /// Calculates the duration this meter has been/was active.
     /// </summary>
     public TimeSpan Duration => IsActive 
-        ? DateTime.UtcNow - StartTime 
+        ? DateTimeOffset.UtcNow - StartTime 
         : (EndTime!.Value - StartTime);
     
     /// <summary>

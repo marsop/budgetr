@@ -58,6 +58,6 @@ public interface ITimeTrackingService
 /// </summary>
 public class TimelineDataPoint
 {
-    public DateTime Timestamp { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
     public double BalanceHours { get; set; }
 }
