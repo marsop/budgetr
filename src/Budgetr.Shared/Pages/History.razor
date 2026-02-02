@@ -1,0 +1,147 @@
+@page "/history"
+@using Budgetr.Shared.Services
+@using Budgetr.Shared.Models
+@inject ITimeTrackingService TimeService
+@implements IDisposable
+
+<div class="history-page">
+    <h1 class="page-title">History</h1>
+    
+    @if (!Events.Any())
+    {
+        <div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <p>No events recorded yet</p>
+            <p class="empty-hint">Start a meter to begin tracking time</p>
+        </div>
+    }
+    else
+    {
+        <div class="events-list">
+            @foreach (var evt in Events)
+            {
+                <div class="event-card @(evt.Factor >= 0 ? "positive" : "negative") @(evt.IsActive ? "active" : "")">
+                    <div class="event-header">
+                        <span class="event-meter-name">@evt.MeterName</span>
+                        @if (evt.IsActive)
+                        {
+                            <span class="event-badge active-badge">
+                                <span class="pulse"></span>
+                                Active
+                            </span>
+                        }
+                    </div>
+                    
+                    <div class="event-times">
+                        <div class="event-time">
+                            <span class="time-label">Started</span>
+                            <span class="time-value">@FormatDateTime(evt.StartTime)</span>
+                        </div>
+                        @if (evt.EndTime.HasValue)
+                        {
+                            <div class="event-time">
+                                <span class="time-label">Ended</span>
+                                <span class="time-value">@FormatDateTime(evt.EndTime.Value)</span>
+                            </div>
+                        }
+                    </div>
+                    
+                    <div class="event-stats">
+                        <div class="event-stat">
+                            <span class="stat-label">Duration</span>
+                            <span class="stat-value">@FormatDuration(evt.Duration)</span>
+                        </div>
+                        <div class="event-stat">
+                            <span class="stat-label">Contribution</span>
+                            <span class="stat-value contribution @(evt.TimeContribution.TotalHours >= 0 ? "positive" : "negative")">
+                                @FormatContribution(evt.TimeContribution)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private IEnumerable<MeterEvent> Events => TimeService.Account.Events
+        .OrderByDescending(e => e.StartTime);
+    
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        TimeService.OnStateChanged += StateHasChanged;
+        
+        // Update every second when a meter is active
+        _timer = new System.Threading.Timer(_ =>
+        {
+            if (TimeService.GetActiveEvent() != null)
+            {
+                InvokeAsync(StateHasChanged);
+            }
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+    }
+
+    private string FormatDateTime(DateTimeOffset dateTime)
+    {
+        var local = dateTime.ToLocalTime();
+        var now = DateTimeOffset.Now;
+        
+        if (local.Date == now.Date)
+        {
+            return $"Today at {local:HH:mm}";
+        }
+        else if (local.Date == now.Date.AddDays(-1))
+        {
+            return $"Yesterday at {local:HH:mm}";
+        }
+        else if (local.Year == now.Year)
+        {
+            return local.ToString("MMM d 'at' HH:mm");
+        }
+        else
+        {
+            return local.ToString("MMM d, yyyy 'at' HH:mm");
+        }
+    }
+
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+        {
+            return $"{(int)duration.TotalHours}h {duration.Minutes}m";
+        }
+        else if (duration.TotalMinutes >= 1)
+        {
+            return $"{(int)duration.TotalMinutes}m {duration.Seconds}s";
+        }
+        else
+        {
+            return $"{(int)duration.TotalSeconds}s";
+        }
+    }
+
+    private string FormatContribution(TimeSpan contribution)
+    {
+        var sign = contribution.TotalHours >= 0 ? "+" : "";
+        var hours = contribution.TotalHours;
+        
+        if (Math.Abs(hours) >= 1)
+        {
+            return $"{sign}{hours:F2}h";
+        }
+        else
+        {
+            var minutes = contribution.TotalMinutes;
+            return $"{sign}{minutes:F1}m";
+        }
+    }
+
+    public void Dispose()
+    {
+        TimeService.OnStateChanged -= StateHasChanged;
+        _timer?.Dispose();
+    }
+}
