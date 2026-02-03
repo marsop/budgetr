@@ -3,6 +3,8 @@
 @using Microsoft.JSInterop
 @inject ITimeTrackingService TimeService
 @inject IJSRuntime JS
+@inject IAutoSyncService AutoSyncService
+@implements IDisposable
 
 <div class="sync-page">
     <h2 class="page-title">Sync</h2>
@@ -123,6 +125,40 @@
                     </button>
                 </div>
                 
+                <div class="auto-sync-section">
+                    <div class="auto-sync-header">
+                        <span class="auto-sync-label">🔄 Auto-sync on changes</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked="@isAutoSyncEnabled" @onchange="OnAutoSyncToggled" disabled="@isTogglingAutoSync" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    @if (isAutoSyncEnabled)
+                    {
+                        <div class="auto-sync-status @GetAutoSyncStatusClass()">
+                            @switch (autoSyncStatus)
+                            {
+                                case AutoSyncStatus.Syncing:
+                                    <span class="status-icon spinning">🔄</span>
+                                    <span>Syncing...</span>
+                                    break;
+                                case AutoSyncStatus.Success:
+                                    <span class="status-icon">✅</span>
+                                    <span>Last auto-sync: @(lastAutoSyncTime?.ToLocalTime().ToString("g") ?? "Never")</span>
+                                    break;
+                                case AutoSyncStatus.Failed:
+                                    <span class="status-icon">❌</span>
+                                    <span>Sync failed - will retry on next change</span>
+                                    break;
+                                default:
+                                    <span class="status-icon">⏳</span>
+                                    <span>Watching for changes...</span>
+                                    break;
+                            }
+                        </div>
+                    }
+                </div>
+                
                 <div class="signout-section">
                     <button class="link-button signout" @onclick="SignOutFromGoogle">Sign Out</button>
                 </div>
@@ -158,11 +194,20 @@
     private bool isBackingUp;
     private bool isRestoring;
     private DateTimeOffset? lastBackupTime;
+    
+    // Auto-sync state
+    private bool isAutoSyncEnabled;
+    private bool isTogglingAutoSync;
+    private AutoSyncStatus autoSyncStatus = AutoSyncStatus.Idle;
+    private DateTimeOffset? lastAutoSyncTime;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            // Subscribe to auto-sync status changes
+            AutoSyncService.OnStatusChanged += OnAutoSyncStatusChanged;
+            
             // Try to auto-initialize Google Drive if previously configured
             await TryInitializeGoogleDrive();
         }
@@ -183,6 +228,7 @@
                 {
                     googleUserEmail = await JS.InvokeAsync<string?>("googleDriveInterop.getUserEmail");
                     await RefreshBackupInfo();
+                    await RefreshAutoSyncState();
                 }
                 
                 StateHasChanged();
@@ -277,6 +323,14 @@
             isGoogleDriveSignedIn = false;
             googleUserEmail = null;
             lastBackupTime = null;
+            
+            // Disable auto-sync when signing out
+            if (isAutoSyncEnabled)
+            {
+                await AutoSyncService.DisableAsync();
+                isAutoSyncEnabled = false;
+            }
+            
             statusMessage = "Signed out successfully.";
             statusClass = "success";
         }
@@ -428,5 +482,71 @@
             isImporting = false;
             StateHasChanged();
         }
+    }
+
+    // Auto-sync methods
+    private async Task OnAutoSyncToggled(ChangeEventArgs e)
+    {
+        var newValue = (bool)(e.Value ?? false);
+        isTogglingAutoSync = true;
+        StateHasChanged();
+        
+        try
+        {
+            if (newValue)
+            {
+                await AutoSyncService.EnableAsync();
+                isAutoSyncEnabled = true;
+                statusMessage = "Auto-sync enabled. Changes will be backed up automatically.";
+                statusClass = "success";
+            }
+            else
+            {
+                await AutoSyncService.DisableAsync();
+                isAutoSyncEnabled = false;
+                statusMessage = "Auto-sync disabled.";
+                statusClass = "success";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Failed to toggle auto-sync: {ex.Message}";
+            statusClass = "error";
+        }
+        finally
+        {
+            isTogglingAutoSync = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OnAutoSyncStatusChanged(AutoSyncStatus status)
+    {
+        autoSyncStatus = status;
+        lastAutoSyncTime = AutoSyncService.LastSyncTime;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task RefreshAutoSyncState()
+    {
+        isAutoSyncEnabled = AutoSyncService.IsEnabled;
+        autoSyncStatus = AutoSyncService.Status;
+        lastAutoSyncTime = AutoSyncService.LastSyncTime;
+    }
+
+    private string GetAutoSyncStatusClass()
+    {
+        return autoSyncStatus switch
+        {
+            AutoSyncStatus.Syncing => "syncing",
+            AutoSyncStatus.Success => "success",
+            AutoSyncStatus.Failed => "error",
+            _ => "idle"
+        };
+    }
+
+    public void Dispose()
+    {
+        AutoSyncService.OnStatusChanged -= OnAutoSyncStatusChanged;
     }
 }

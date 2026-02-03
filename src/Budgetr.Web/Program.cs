@@ -14,6 +14,8 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<IStorageService, BrowserStorageService>();
 builder.Services.AddScoped<IMeterConfigurationService, MeterConfigurationService>();
 builder.Services.AddScoped<ITimeTrackingService, TimeTrackingService>();
+builder.Services.AddScoped<GoogleDriveService>();
+builder.Services.AddScoped<IAutoSyncService, AutoSyncService>();
 
 var host = builder.Build();
 
