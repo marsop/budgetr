@@ -177,6 +177,29 @@ public class TimeTrackingService : ITimeTrackingService
         await SaveAsync();
     }
 
+    public void RenameMeter(Guid meterId, string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName) || newName.Length < 1 || newName.Length > 40)
+        {
+            throw new ArgumentException("Meter name must be between 1 and 40 characters.");
+        }
+
+        var meter = _account.Meters.FirstOrDefault(m => m.Id == meterId);
+        if (meter == null) return;
+
+        meter.Name = newName.Trim();
+        
+        // Update active event if this meter is currently running
+        var activeEvent = GetActiveEvent();
+        if (activeEvent != null && activeEvent.Factor == meter.Factor)
+        {
+            activeEvent.MeterName = meter.Name;
+        }
+        
+        OnStateChanged?.Invoke();
+        _ = SaveAsync();
+    }
+
     public string ExportData()
     {
         var exportData = new BudgetrExportData

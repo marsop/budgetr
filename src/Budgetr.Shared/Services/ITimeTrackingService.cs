@@ -67,6 +67,14 @@ public interface ITimeTrackingService
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when import data has duplicate meter factors.</exception>
     Task ImportDataAsync(string json);
+    
+    /// <summary>
+    /// Renames a meter. Only affects future events; existing events keep the old name.
+    /// </summary>
+    /// <param name="meterId">The ID of the meter to rename.</param>
+    /// <param name="newName">The new name (1-40 characters).</param>
+    /// <exception cref="ArgumentException">Thrown when the name is invalid.</exception>
+    void RenameMeter(Guid meterId, string newName);
 }
 
 /// <summary>
