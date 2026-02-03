@@ -62,6 +62,17 @@ public class TimeTrackingService : ITimeTrackingService
         }
     }
 
+    public void DeleteEvent(Guid eventId)
+    {
+        var eventToDelete = _account.Events.FirstOrDefault(e => e.Id == eventId);
+        if (eventToDelete != null)
+        {
+            _account.Events.Remove(eventToDelete);
+            OnStateChanged?.Invoke();
+            _ = SaveAsync();
+        }
+    }
+
     public List<TimelineDataPoint> GetTimelineData(TimeSpan period)
     {
         var points = new List<TimelineDataPoint>();

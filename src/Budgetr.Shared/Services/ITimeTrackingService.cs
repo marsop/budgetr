@@ -38,6 +38,11 @@ public interface ITimeTrackingService
     List<TimelineDataPoint> GetTimelineData(TimeSpan period);
     
     /// <summary>
+    /// Deletes an event by its ID. Updates balance and triggers state change.
+    /// </summary>
+    void DeleteEvent(Guid eventId);
+    
+    /// <summary>
     /// Saves the current state to persistent storage.
     /// </summary>
     Task SaveAsync();
