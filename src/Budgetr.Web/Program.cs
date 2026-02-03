@@ -12,6 +12,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 // Register services
 builder.Services.AddScoped<IStorageService, BrowserStorageService>();
+builder.Services.AddScoped<IMeterConfigurationService, MeterConfigurationService>();
 builder.Services.AddScoped<ITimeTrackingService, TimeTrackingService>();
 
 var host = builder.Build();

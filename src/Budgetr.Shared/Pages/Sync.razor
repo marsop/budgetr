@@ -1,0 +1,134 @@
+@page "/sync"
+@using Budgetr.Shared.Services
+@using Microsoft.JSInterop
+@inject ITimeTrackingService TimeService
+@inject IJSRuntime JS
+
+<div class="sync-page">
+    <h2 class="page-title">Sync</h2>
+    
+    <div class="sync-section">
+        <h3>Export Data</h3>
+        <p class="section-description">Download all your data (meters and events) as a JSON file.</p>
+        <button class="sync-button export-btn" @onclick="ExportData" disabled="@isExporting">
+            <span class="btn-icon">📥</span>
+            <span>@(isExporting ? "Exporting..." : "Export Data")</span>
+        </button>
+    </div>
+    
+    <div class="sync-section">
+        <h3>Import Data</h3>
+        <p class="section-description">Replace your current data by importing a JSON file.</p>
+        
+        <div class="file-input-container">
+            <input type="file" 
+                   id="importFileInput" 
+                   accept=".json" 
+                   @ref="fileInput" 
+                   @onchange="OnFileSelected"
+                   class="file-input" />
+            <label for="importFileInput" class="file-label">
+                <span class="btn-icon">📁</span>
+                <span>Choose File</span>
+            </label>
+        </div>
+        
+        @if (!string.IsNullOrEmpty(selectedFileName))
+        {
+            <div class="selected-file">
+                <span>Selected: @selectedFileName</span>
+            </div>
+            <button class="sync-button import-btn" @onclick="ImportData" disabled="@isImporting">
+                <span class="btn-icon">📤</span>
+                <span>@(isImporting ? "Importing..." : "Import Data")</span>
+            </button>
+        }
+        
+        @if (!string.IsNullOrEmpty(statusMessage))
+        {
+            <div class="status-message @statusClass">
+                @statusMessage
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private ElementReference fileInput;
+    private string? selectedFileName;
+    private bool isExporting;
+    private bool isImporting;
+    private string? statusMessage;
+    private string statusClass = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Ensure JS module is loaded
+            await JS.InvokeVoidAsync("eval", "");
+        }
+    }
+
+    private async Task ExportData()
+    {
+        isExporting = true;
+        statusMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var json = TimeService.ExportData();
+            var filename = $"budgetr-export-{DateTime.Now:yyyy-MM-dd-HHmmss}.json";
+            
+            await JS.InvokeVoidAsync("syncInterop.downloadFile", filename, json);
+            
+            statusMessage = "Data exported successfully!";
+            statusClass = "success";
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Export failed: {ex.Message}";
+            statusClass = "error";
+        }
+        finally
+        {
+            isExporting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OnFileSelected(ChangeEventArgs e)
+    {
+        selectedFileName = e.Value?.ToString();
+        statusMessage = null;
+        StateHasChanged();
+    }
+
+    private async Task ImportData()
+    {
+        isImporting = true;
+        statusMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var content = await JS.InvokeAsync<string>("syncInterop.readFileContent", fileInput);
+            await TimeService.ImportDataAsync(content);
+            
+            statusMessage = "Data imported successfully! Meters and events have been updated.";
+            statusClass = "success";
+            selectedFileName = null;
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Import failed: {ex.Message}";
+            statusClass = "error";
+        }
+        finally
+        {
+            isImporting = false;
+            StateHasChanged();
+        }
+    }
+}

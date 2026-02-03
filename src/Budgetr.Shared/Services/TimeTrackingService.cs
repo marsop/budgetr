@@ -9,16 +9,18 @@ namespace Budgetr.Shared.Services;
 public class TimeTrackingService : ITimeTrackingService
 {
     private readonly IStorageService _storage;
-    private TimeAccount _account = TimeAccount.CreateDefault();
+    private readonly IMeterConfigurationService _meterConfig;
+    private TimeAccount _account = new TimeAccount();
     private const string StorageKey = "budgetr_account";
     
     public TimeAccount Account => _account;
     
     public event Action? OnStateChanged;
 
-    public TimeTrackingService(IStorageService storage)
+    public TimeTrackingService(IStorageService storage, IMeterConfigurationService meterConfig)
     {
         _storage = storage;
+        _meterConfig = meterConfig;
     }
 
     public TimeSpan GetCurrentBalance()
@@ -148,20 +150,106 @@ public class TimeTrackingService : ITimeTrackingService
 
     public async Task LoadAsync()
     {
+        // Load meters from configuration
+        _account.Meters = await _meterConfig.LoadMetersAsync();
+        
         var json = await _storage.GetItemAsync(StorageKey);
         if (!string.IsNullOrEmpty(json))
         {
             var loaded = JsonSerializer.Deserialize<TimeAccount>(json);
             if (loaded != null)
             {
-                _account = loaded;
-                // Ensure we have default meters if none exist
-                if (_account.Meters.Count == 0)
+                _account.Events = loaded.Events;
+                
+                // Auto-stop any active events whose meter factor no longer exists
+                var availableFactors = _account.Meters.Select(m => m.Factor).ToHashSet();
+                foreach (var activeEvent in _account.Events.Where(e => e.IsActive))
                 {
-                    _account.Meters = TimeAccount.CreateDefault().Meters;
+                    if (!availableFactors.Contains(activeEvent.Factor))
+                    {
+                        activeEvent.EndTime = DateTimeOffset.UtcNow;
+                    }
                 }
-                OnStateChanged?.Invoke();
             }
         }
+        
+        OnStateChanged?.Invoke();
+        await SaveAsync();
     }
+
+    public string ExportData()
+    {
+        var exportData = new BudgetrExportData
+        {
+            ExportedAt = DateTimeOffset.UtcNow,
+            Meters = _account.Meters,
+            Events = _account.Events
+        };
+        
+        return JsonSerializer.Serialize(exportData, new JsonSerializerOptions 
+        { 
+            WriteIndented = true 
+        });
+    }
+
+    public async Task ImportDataAsync(string json)
+    {
+        var importData = JsonSerializer.Deserialize<BudgetrExportData>(json);
+        
+        if (importData == null)
+        {
+            throw new InvalidOperationException("Invalid import data format.");
+        }
+
+        if (importData.Meters == null || importData.Meters.Count == 0)
+        {
+            throw new InvalidOperationException("Import data must contain at least one meter.");
+        }
+
+        // Validate no duplicate factors
+        var duplicateFactors = importData.Meters
+            .GroupBy(m => m.Factor)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicateFactors.Any())
+        {
+            throw new InvalidOperationException(
+                $"Duplicate meter factors detected: {string.Join(", ", duplicateFactors)}. Each meter must have a unique factor.");
+        }
+
+        // Assign display order based on definition order
+        for (int i = 0; i < importData.Meters.Count; i++)
+        {
+            importData.Meters[i].DisplayOrder = i;
+        }
+
+        // Replace current data
+        _account.Meters = importData.Meters;
+        _account.Events = importData.Events ?? new List<MeterEvent>();
+
+        // Auto-stop any active events whose meter factor no longer exists
+        var availableFactors = _account.Meters.Select(m => m.Factor).ToHashSet();
+        foreach (var activeEvent in _account.Events.Where(e => e.IsActive))
+        {
+            if (!availableFactors.Contains(activeEvent.Factor))
+            {
+                activeEvent.EndTime = DateTimeOffset.UtcNow;
+            }
+        }
+
+        OnStateChanged?.Invoke();
+        await SaveAsync();
+    }
+}
+
+/// <summary>
+/// Data structure for import/export operations.
+/// </summary>
+public class BudgetrExportData
+{
+    public DateTimeOffset ExportedAt { get; set; }
+    public List<Meter> Meters { get; set; } = new();
+    public List<MeterEvent> Events { get; set; } = new();
 }

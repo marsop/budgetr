@@ -56,6 +56,17 @@ public interface ITimeTrackingService
     /// Event raised when the account state changes.
     /// </summary>
     event Action? OnStateChanged;
+    
+    /// <summary>
+    /// Exports all data (meters and events) as a JSON string.
+    /// </summary>
+    string ExportData();
+    
+    /// <summary>
+    /// Imports data from a JSON string, replacing current meters and events.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when import data has duplicate meter factors.</exception>
+    Task ImportDataAsync(string json);
 }
 
 /// <summary>

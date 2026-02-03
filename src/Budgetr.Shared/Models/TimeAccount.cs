@@ -28,17 +28,10 @@ public class TimeAccount
     );
     
     /// <summary>
-    /// Creates a default account with +1x and -1x meters.
+    /// Creates a default empty account. Meters are loaded from configuration.
     /// </summary>
     public static TimeAccount CreateDefault()
     {
-        return new TimeAccount
-        {
-            Meters = new List<Meter>
-            {
-                new Meter { Name = "+1x", Factor = 1.0, DisplayOrder = 0 },
-                new Meter { Name = "-1x", Factor = -1.0, DisplayOrder = 1 }
-            }
-        };
+        return new TimeAccount();
     }
 }

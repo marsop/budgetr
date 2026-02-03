@@ -673,3 +673,137 @@ html, body {
     background: #dc2626;
     box-shadow: var(--shadow-glow-negative);
 }
+
+/* ===== Sync Page ===== */
+
+.sync-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.sync-section {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-bg-tertiary);
+}
+
+.sync-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.section-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-lg);
+}
+
+.sync-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.sync-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.export-btn {
+    background: var(--color-accent);
+    color: white;
+}
+
+.export-btn:hover:not(:disabled) {
+    background: #5457e5;
+    box-shadow: 0 0 20px var(--color-accent-glow);
+}
+
+.import-btn {
+    background: var(--color-positive);
+    color: white;
+    margin-top: var(--spacing-md);
+}
+
+.import-btn:hover:not(:disabled) {
+    background: #0d9668;
+    box-shadow: var(--shadow-glow-positive);
+}
+
+.btn-icon {
+    font-size: var(--font-size-lg);
+}
+
+.file-input-container {
+    position: relative;
+}
+
+.file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+.file-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 2px dashed var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.file-label:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.selected-file {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.status-message {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
+
+.status-message.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--color-positive);
+    border: 1px solid var(--color-positive);
+}
+
+.status-message.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--color-negative);
+    border: 1px solid var(--color-negative);
+}
