@@ -43,6 +43,7 @@
                     <button class="meter-button @(isActive ? "active" : "") @(meter.Factor >= 0 ? "positive" : "negative")"
                             @onclick="() => ToggleMeter(meter.Id)">
                         <div class="meter-name">@meter.Name</div>
+                        <div class="meter-factor">Factor: @meter.Factor.ToString("0.##")</div>
                         <div class="meter-status">
                             @if (isActive)
                             {

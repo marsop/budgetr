@@ -288,6 +288,23 @@ html, body {
     color: var(--color-negative);
 }
 
+.meter-factor {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-muted);
+    opacity: 0.8;
+}
+
+.meter-button.positive .meter-factor {
+    color: var(--color-positive);
+    opacity: 0.7;
+}
+
+.meter-button.negative .meter-factor {
+    color: var(--color-negative);
+    opacity: 0.7;
+}
+
 .meter-status {
     display: flex;
     align-items: center;
