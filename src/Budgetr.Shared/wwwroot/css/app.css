@@ -1158,12 +1158,24 @@ html, body {
     width: 100%;
 }
 
-.edit-btn {
+.meter-actions {
     position: absolute;
     top: var(--spacing-sm);
     right: var(--spacing-sm);
-    width: 28px;
-    height: 28px;
+    display: flex;
+    gap: var(--spacing-xs);
+    z-index: 2;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.meter-container:hover .meter-actions {
+    opacity: 1;
+}
+
+.meter-action-btn {
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1171,15 +1183,20 @@ html, body {
     border-radius: var(--radius-md);
     background: var(--color-bg-tertiary);
     cursor: pointer;
-    font-size: var(--font-size-sm);
-    opacity: 0.7;
+    font-size: 1.2rem;
+    color: var(--color-text-muted);
     transition: all var(--transition-fast);
-    z-index: 1;
 }
 
-.edit-btn:hover {
-    opacity: 1;
+.meter-action-btn:hover {
     background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    transform: scale(1.1);
+}
+
+.meter-action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--color-negative);
 }
 
 .meter-edit-form {

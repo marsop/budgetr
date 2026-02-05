@@ -56,9 +56,17 @@
                             }
                         </div>
                     </button>
-                    <button class="edit-btn" @onclick="() => StartEditing(meter)" @onclick:stopPropagation="true" title="Rename meter">
-                        ✏️
-                    </button>
+                    <div class="meter-actions">
+                        <button class="meter-action-btn" @onclick="() => StartEditing(meter)" @onclick:stopPropagation="true" title="Rename meter">
+                            ✏️
+                        </button>
+                        @if (!isActive)
+                        {
+                            <button class="meter-action-btn delete" @onclick="() => DeleteMeter(meter)" @onclick:stopPropagation="true" title="Delete meter">
+                                🗑️
+                            </button>
+                        }
+                    </div>
                 }
             </div>
         }
@@ -176,6 +184,14 @@
         }
         return $"{duration.Minutes:D2}m {duration.Seconds:D2}s";
     }
+
+    private void DeleteMeter(Meter meter)
+    {
+        if (IsActiveMeter(meter.Id)) return;
+        TimeService.DeleteMeter(meter.Id);
+    }
+
+
 
     public void Dispose()
     {

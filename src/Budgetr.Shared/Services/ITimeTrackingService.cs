@@ -75,6 +75,13 @@ public interface ITimeTrackingService
     /// <param name="newName">The new name (1-40 characters).</param>
     /// <exception cref="ArgumentException">Thrown when the name is invalid.</exception>
     void RenameMeter(Guid meterId, string newName);
+
+    /// <summary>
+    /// Deletes a meter by its ID.
+    /// </summary>
+    /// <param name="meterId">The ID of the meter to delete.</param>
+    /// <exception cref="InvalidOperationException">Thrown when trying to delete an active meter.</exception>
+    void DeleteMeter(Guid meterId);
 }
 
 /// <summary>

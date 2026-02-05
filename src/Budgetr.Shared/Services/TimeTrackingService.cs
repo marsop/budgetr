@@ -265,6 +265,33 @@ public class TimeTrackingService : ITimeTrackingService
         OnStateChanged?.Invoke();
         await SaveAsync();
     }
+
+    public void DeleteMeter(Guid meterId)
+    {
+        var meter = _account.Meters.FirstOrDefault(m => m.Id == meterId);
+        if (meter == null) return;
+
+        var activeEvent = GetActiveEvent();
+        if (activeEvent != null && activeEvent.MeterName == meter.Name) // Matching by name as names are unique per definition (though factor is the strict key, UI uses name) - actually `ActivateMeter` stores name. Let's check logic.
+        {
+             // Checking by ID in account meters is safer if we had ID in event, but event stores name/factor.
+             // Let's rely on the meter we just found. 
+             // IF the currently active event corresponds to this meter.
+             // GetActiveEvent returns an event. Event has MeterName and Factor.
+             // Meter has Name and Factor.
+             // The most reliable check for "Is Active" as used in Meters.razor is:
+             // activeEvent.MeterName == meter.Name
+             
+             if (activeEvent.MeterName == meter.Name)
+             {
+                 throw new InvalidOperationException("Cannot delete the currently active meter.");
+             }
+        }
+        
+        _account.Meters.Remove(meter);
+        OnStateChanged?.Invoke();
+        _ = SaveAsync();
+    }
 }
 
 /// <summary>
