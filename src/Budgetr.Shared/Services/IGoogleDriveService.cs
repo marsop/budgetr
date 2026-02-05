@@ -44,7 +44,7 @@ public interface IGoogleDriveService
     /// Creates the file if it doesn't exist, updates it if it does.
     /// </summary>
     /// <param name="content">JSON content to save.</param>
-    Task SaveBackupAsync(string content);
+    Task<DateTimeOffset?> SaveBackupAsync(string content);
     
     /// <summary>
     /// Gets the last modified time of the backup file.

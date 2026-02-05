@@ -140,20 +140,32 @@ public class GoogleDriveService : IGoogleDriveService
         }
     }
 
-    public async Task SaveBackupAsync(string content)
+    public async Task<DateTimeOffset?> SaveBackupAsync(string content)
     {
         if (!_isInitialized)
             throw new InvalidOperationException("Google Drive service not initialized.");
             
         try
         {
-            await _js.InvokeVoidAsync("googleDriveInterop.saveBackup", content);
+            var result = await _js.InvokeAsync<GoogleDriveFileMetadata>("googleDriveInterop.saveBackup", content);
+            if (result != null && DateTimeOffset.TryParse(result.ModifiedTime, out var modifiedTime))
+            {
+                return modifiedTime;
+            }
+            return null;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to save backup: {ex.Message}");
             throw;
         }
+    }
+
+    private class GoogleDriveFileMetadata
+    {
+        public string? Id { get; set; }
+        public string? Name { get; set; }
+        public string? ModifiedTime { get; set; }
     }
 
     public async Task<DateTimeOffset?> GetBackupLastModifiedAsync()

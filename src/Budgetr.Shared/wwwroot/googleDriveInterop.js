@@ -218,6 +218,8 @@ window.googleDriveInterop = {
                 const error = await response.json();
                 throw new Error(error.error?.message || 'Failed to update file');
             }
+            
+            return await response.json();
         } else {
             // Create new file
             const metadata = {
@@ -241,6 +243,8 @@ window.googleDriveInterop = {
                 const error = await response.json();
                 throw new Error(error.error?.message || 'Failed to create file');
             }
+            
+            return await response.json();
         }
     },
     
