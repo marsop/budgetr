@@ -2,6 +2,6 @@
 
 Personal Time Budgeting and Accounting
 
-## Deployed at
+## Live Version
 
-https://albertogregorio.com/budgetr/
+Available at https://albertogregorio.com/budgetr/
