@@ -14,6 +14,20 @@ public class TimeTrackingService : ITimeTrackingService
     private const string StorageKey = "budgetr_account";
     
     public TimeAccount Account => _account;
+
+    public TimeSpan TimelinePeriod
+    {
+        get => _account.TimelinePeriod;
+        set
+        {
+            if (_account.TimelinePeriod != value)
+            {
+                _account.TimelinePeriod = value;
+                OnStateChanged?.Invoke();
+                _ = SaveAsync();
+            }
+        }
+    }
     
     public event Action? OnStateChanged;
 
@@ -160,6 +174,16 @@ public class TimeTrackingService : ITimeTrackingService
             if (loaded != null)
             {
                 _account.Events = loaded.Events;
+                
+                // Ensure TimelinePeriod is valid (handle migration from versions without it)
+                if (loaded.TimelinePeriod != TimeSpan.Zero)
+                {
+                    _account.TimelinePeriod = loaded.TimelinePeriod;
+                }
+                else
+                {
+                    _account.TimelinePeriod = TimeSpan.FromHours(24);
+                }
                 
                 // Auto-stop any active events whose meter factor no longer exists
                 var availableFactors = _account.Meters.Select(m => m.Factor).ToHashSet();

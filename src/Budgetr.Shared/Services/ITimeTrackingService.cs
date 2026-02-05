@@ -11,6 +11,11 @@ public interface ITimeTrackingService
     /// Gets the current time account state.
     /// </summary>
     TimeAccount Account { get; }
+
+    /// <summary>
+    /// Gets or sets the current timeline period.
+    /// </summary>
+    TimeSpan TimelinePeriod { get; set; }
     
     /// <summary>
     /// Gets the current balance, calculated in real-time.

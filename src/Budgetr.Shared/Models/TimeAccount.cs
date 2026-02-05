@@ -14,6 +14,11 @@ public class TimeAccount
     /// Configured meters available to the user.
     /// </summary>
     public List<Meter> Meters { get; set; } = new();
+
+    /// <summary>
+    /// The selected timeline period for the chart.
+    /// </summary>
+    public TimeSpan TimelinePeriod { get; set; } = TimeSpan.FromHours(24);
     
     /// <summary>
     /// Gets the currently active event, if any.

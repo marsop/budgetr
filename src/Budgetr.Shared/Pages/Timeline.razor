@@ -9,7 +9,7 @@
     <div class="period-selector">
         @foreach (var period in Periods)
         {
-            <button class="period-button @(SelectedPeriod == period.Value ? "selected" : "")"
+            <button class="period-button @(TimeService.TimelinePeriod == period.Value ? "selected" : "")"
                     @onclick="() => SelectPeriod(period.Value)">
                 @period.Label
             </button>
@@ -32,7 +32,6 @@
         new PeriodOption("1w", TimeSpan.FromDays(7))
     };
     
-    private TimeSpan SelectedPeriod { get; set; } = TimeSpan.FromHours(24);
     private List<TimelineDataPoint> DataPoints { get; set; } = new();
     
     private double MinY => DataPoints.Count > 0 ? Math.Min(0, DataPoints.Min(p => p.BalanceHours)) : 0;
@@ -60,17 +59,17 @@
 
     private void SelectPeriod(TimeSpan period)
     {
-        SelectedPeriod = period;
+        TimeService.TimelinePeriod = period;
         RefreshData();
     }
 
     private void RefreshData()
     {
-        DataPoints = TimeService.GetTimelineData(SelectedPeriod);
+        DataPoints = TimeService.GetTimelineData(TimeService.TimelinePeriod);
     }
 
     // Time window for the chart
-    private DateTimeOffset StartTime => DateTimeOffset.UtcNow - SelectedPeriod;
+    private DateTimeOffset StartTime => DateTimeOffset.UtcNow - TimeService.TimelinePeriod;
     private DateTimeOffset EndTime => DateTimeOffset.UtcNow;
 
     private double GetXFromTimestamp(DateTimeOffset timestamp)
@@ -167,11 +166,11 @@
         // Always show X-axis time labels
         sb.Append(@"<g class=""x-labels"">");
         var chartEndTime = DateTimeOffset.Now;
-        var chartStartTime = chartEndTime - SelectedPeriod;
+        var chartStartTime = chartEndTime - TimeService.TimelinePeriod;
         for (int i = 0; i <= 4; i++)
         {
             var x = 50 + i * 175; // 700 / 4 = 175
-            var time = chartStartTime + TimeSpan.FromTicks((long)(SelectedPeriod.Ticks * i / 4.0));
+            var time = chartStartTime + TimeSpan.FromTicks((long)(TimeService.TimelinePeriod.Ticks * i / 4.0));
             var timeLabel = FormatTimeLabel(time);
             sb.Append($@"<text x=""{x}"" y=""370"" text-anchor=""middle"" fill=""#888"" font-size=""11"">{timeLabel}</text>");
         }
@@ -225,11 +224,11 @@
     {
         // Convert to local time for display
         var localTime = time.LocalDateTime;
-        if (SelectedPeriod.TotalHours <= 1)
+        if (TimeService.TimelinePeriod.TotalHours <= 1)
         {
             return localTime.ToString("HH:mm");
         }
-        else if (SelectedPeriod.TotalHours <= 24)
+        else if (TimeService.TimelinePeriod.TotalHours <= 24)
         {
             return localTime.ToString("HH:mm");
         }
