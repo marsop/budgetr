@@ -84,7 +84,13 @@ html, body {
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-lg);
-    padding-bottom: calc(80px + var(--spacing-lg));
+    padding-bottom: calc(60px + var(--spacing-lg));
+}
+
+@media (min-width: 480px) {
+    .main-content {
+        padding-bottom: calc(80px + var(--spacing-lg));
+    }
 }
 
 /* ===== Bottom Navigation ===== */
@@ -96,24 +102,42 @@ html, body {
     right: 0;
     display: flex;
     justify-content: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: linear-gradient(to top, var(--color-bg-primary) 80%, transparent);
-    padding-top: var(--spacing-xl);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: linear-gradient(to top, var(--color-bg-primary) 85%, transparent);
+    padding-top: var(--spacing-lg);
+    z-index: 100;
 }
 
 .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-sm) var(--spacing-lg);
+    gap: 4px;
+    padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-lg);
     text-decoration: none;
     color: var(--color-text-muted);
     transition: all var(--transition-normal);
     background: var(--color-bg-secondary);
     border: 1px solid transparent;
+    flex: 1;
+    max-width: 80px;
+    min-width: 0;
+}
+
+@media (min-width: 480px) {
+    .bottom-nav {
+        gap: var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-lg);
+        padding-top: var(--spacing-xl);
+    }
+    
+    .nav-item {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        max-width: none;
+        flex: none;
+    }
 }
 
 .nav-item:hover {
@@ -129,12 +153,15 @@ html, body {
 }
 
 .nav-icon {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
 }
 
 .nav-label {
-    font-size: var(--font-size-xs);
-    font-weight: 500;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ===== Overview Page ===== */
