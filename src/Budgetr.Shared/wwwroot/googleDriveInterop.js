@@ -33,11 +33,16 @@ window.googleDriveInterop = {
                 }
             });
             
-            // Check for existing token in session storage
-            const savedToken = sessionStorage.getItem('budgetr_gdrive_token');
+            // Check for existing token in local storage
+            const savedToken = localStorage.getItem('budgetr_gdrive_token');
             if (savedToken) {
                 this._accessToken = savedToken;
-                await this._fetchUserEmail();
+                const email = await this._fetchUserEmail();
+                if (!email) {
+                    // Token expired or invalid
+                    this._accessToken = null;
+                    localStorage.removeItem('budgetr_gdrive_token');
+                }
             }
             
             this._isInitialized = true;
@@ -118,7 +123,7 @@ window.googleDriveInterop = {
                 
                 if (response.access_token) {
                     this._accessToken = response.access_token;
-                    sessionStorage.setItem('budgetr_gdrive_token', response.access_token);
+                    localStorage.setItem('budgetr_gdrive_token', response.access_token);
                     await this._fetchUserEmail();
                     resolve(true);
                 } else {
@@ -127,7 +132,8 @@ window.googleDriveInterop = {
             };
             
             // Request access token
-            this._tokenClient.requestAccessToken({ prompt: 'consent' });
+            // Removed prompt: 'consent' to avoid forcing the consent screen every time
+            this._tokenClient.requestAccessToken();
         });
     },
     
@@ -143,7 +149,7 @@ window.googleDriveInterop = {
         
         this._accessToken = null;
         this._userEmail = null;
-        sessionStorage.removeItem('budgetr_gdrive_token');
+        localStorage.removeItem('budgetr_gdrive_token');
     },
     
     // Find the backup file in Google Drive
