@@ -69,7 +69,47 @@
                     </div>
                 }
             </div>
+
         }
+        
+        <div class="meter-container add-meter">
+            @if (_isAddingMeter)
+            {
+                <div class="meter-edit-form">
+                    <input type="text" 
+                           class="meter-name-input"
+                           placeholder="Name"
+                           @bind="_newMeterName"
+                           maxlength="40"
+                           autofocus />
+                           
+                    <input type="number" 
+                           class="meter-factor-input"
+                           placeholder="Factor (e.g. 1.0)"
+                           step="0.1"
+                           min="-10"
+                           max="10"
+                           @bind="_newMeterFactor" />
+                           
+                    <div class="edit-actions">
+                        <button class="edit-action-btn save" @onclick="SaveNewMeter" title="Add">✓</button>
+                        <button class="edit-action-btn cancel" @onclick="CancelAdd" title="Cancel">✕</button>
+                    </div>
+                    
+                    @if (_addValidationError != null)
+                    {
+                        <div class="validation-error">@_addValidationError</div>
+                    }
+                </div>
+            }
+            else
+            {
+                <button class="meter-button add-meter-btn" @onclick="StartAdding">
+                    <div class="add-icon">+</div>
+                    <div class="add-text">Add Meter</div>
+                </button>
+            }
+        </div>
     </div>
     
     @if (ActiveEvent != null)
@@ -90,6 +130,12 @@
     private Guid? _editingMeterId;
     private string? _editingMeterName;
     private string? _validationError;
+
+    // Add Meter State
+    private bool _isAddingMeter;
+    private string _newMeterName = string.Empty;
+    private double _newMeterFactor = 1.0;
+    private string? _addValidationError;
 
     protected override void OnInitialized()
     {
@@ -128,6 +174,8 @@
         _editingMeterId = meter.Id;
         _editingMeterName = meter.Name;
         _validationError = null;
+        // Cancel adding if active
+        CancelAdd();
     }
 
     private void SaveEdit()
@@ -190,8 +238,43 @@
         if (IsActiveMeter(meter.Id)) return;
         TimeService.DeleteMeter(meter.Id);
     }
+    
+    // Add Meter Logic
+    private void StartAdding()
+    {
+        _isAddingMeter = true;
+        _newMeterName = string.Empty;
+        _newMeterFactor = 1.0;
+        _addValidationError = null;
+        // Cancel editing if active
+        CancelEdit();
+    }
 
+    private void CancelAdd()
+    {
+        _isAddingMeter = false;
+        _newMeterName = string.Empty;
+        _addValidationError = null;
+    }
 
+    private void SaveNewMeter()
+    {
+        if (string.IsNullOrWhiteSpace(_newMeterName))
+        {
+            _addValidationError = "Name is required";
+            return;
+        }
+        
+        try
+        {
+            TimeService.AddMeter(_newMeterName, _newMeterFactor);
+            CancelAdd();
+        }
+        catch (Exception ex)
+        {
+            _addValidationError = ex.Message;
+        }
+    }
 
     public void Dispose()
     {

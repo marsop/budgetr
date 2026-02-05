@@ -1290,3 +1290,48 @@ html, body {
 .char-count.over-limit {
     color: var(--color-negative);
 }
+
+/* ===== Add Meter ===== */
+
+.meter-button.add-meter-btn {
+    border-style: dashed;
+    background: transparent;
+    opacity: 0.7;
+}
+
+.meter-button.add-meter-btn:hover {
+    opacity: 1;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.add-icon {
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+
+.add-text {
+    font-size: var(--font-size-md);
+    font-weight: 500;
+}
+
+.meter-factor-input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.meter-factor-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+}

@@ -292,6 +292,31 @@ public class TimeTrackingService : ITimeTrackingService
         OnStateChanged?.Invoke();
         _ = SaveAsync();
     }
+
+    public void AddMeter(string name, double factor)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name.Length < 1 || name.Length > 40)
+        {
+            throw new ArgumentException("Meter name must be between 1 and 40 characters.");
+        }
+
+        // Check for duplicate factor
+        if (_account.Meters.Any(m => Math.Abs(m.Factor - factor) < 0.001))
+        {
+            throw new ArgumentException($"A meter with factor {factor} already exists.");
+        }
+
+        var newMeter = new Meter
+        {
+            Name = name.Trim(),
+            Factor = factor,
+            DisplayOrder = _account.Meters.Count > 0 ? _account.Meters.Max(m => m.DisplayOrder) + 1 : 0
+        };
+
+        _account.Meters.Add(newMeter);
+        OnStateChanged?.Invoke();
+        _ = SaveAsync();
+    }
 }
 
 /// <summary>

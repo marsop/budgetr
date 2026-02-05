@@ -82,6 +82,14 @@ public interface ITimeTrackingService
     /// <param name="meterId">The ID of the meter to delete.</param>
     /// <exception cref="InvalidOperationException">Thrown when trying to delete an active meter.</exception>
     void DeleteMeter(Guid meterId);
+
+    /// <summary>
+    /// Adds a new meter with the specified name and factor.
+    /// </summary>
+    /// <param name="name">Name of the meter.</param>
+    /// <param name="factor">Factor for the meter.</param>
+    /// <exception cref="ArgumentException">Thrown when name is invalid or factor is duplicate/invalid.</exception>
+    void AddMeter(string name, double factor);
 }
 
 /// <summary>
