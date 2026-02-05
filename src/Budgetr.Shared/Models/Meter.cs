@@ -15,7 +15,24 @@ public class Meter
     /// <summary>
     /// The multiplier for this meter. Positive values add time, negative subtract.
     /// </summary>
-    public double Factor { get; set; }
+    private double _factor;
+
+    /// <summary>
+    /// The multiplier for this meter. Positive values add time, negative subtract.
+    /// Must be between -10 and 10.
+    /// </summary>
+    public double Factor
+    {
+        get => _factor;
+        set
+        {
+            if (value < -10 || value > 10)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "Factor must be between -10 and 10.");
+            }
+            _factor = value;
+        }
+    }
     
     /// <summary>
     /// Order in which this meter appears in the UI.
