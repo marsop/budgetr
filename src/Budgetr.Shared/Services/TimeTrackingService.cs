@@ -164,9 +164,6 @@ public class TimeTrackingService : ITimeTrackingService
 
     public async Task LoadAsync()
     {
-        // Load meters from configuration
-        _account.Meters = await _meterConfig.LoadMetersAsync();
-        
         var json = await _storage.GetItemAsync(StorageKey);
         if (!string.IsNullOrEmpty(json))
         {
@@ -174,6 +171,7 @@ public class TimeTrackingService : ITimeTrackingService
             if (loaded != null)
             {
                 _account.Events = loaded.Events;
+                _account.Meters = loaded.Meters;
                 
                 // Ensure TimelinePeriod is valid (handle migration from versions without it)
                 if (loaded.TimelinePeriod != TimeSpan.Zero)
@@ -184,16 +182,22 @@ public class TimeTrackingService : ITimeTrackingService
                 {
                     _account.TimelinePeriod = TimeSpan.FromHours(24);
                 }
-                
-                // Auto-stop any active events whose meter factor no longer exists
-                var availableFactors = _account.Meters.Select(m => m.Factor).ToHashSet();
-                foreach (var activeEvent in _account.Events.Where(e => e.IsActive))
-                {
-                    if (!availableFactors.Contains(activeEvent.Factor))
-                    {
-                        activeEvent.EndTime = DateTimeOffset.UtcNow;
-                    }
-                }
+            }
+        }
+
+        // Only load default meters if none were loaded from storage
+        if (_account.Meters == null || _account.Meters.Count == 0)
+        {
+            _account.Meters = await _meterConfig.LoadMetersAsync();
+        }
+        
+        // Auto-stop any active events whose meter factor no longer exists
+        var availableFactors = _account.Meters.Select(m => m.Factor).ToHashSet();
+        foreach (var activeEvent in _account.Events.Where(e => e.IsActive))
+        {
+            if (!availableFactors.Contains(activeEvent.Factor))
+            {
+                activeEvent.EndTime = DateTimeOffset.UtcNow;
             }
         }
         
