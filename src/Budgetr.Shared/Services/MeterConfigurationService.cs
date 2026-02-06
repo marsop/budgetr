@@ -24,19 +24,6 @@ public class MeterConfigurationService : IMeterConfigurationService
             throw new InvalidOperationException("No meters configured in meters.json");
         }
 
-        // Validate no duplicate factors
-        var duplicateFactors = config.Meters
-            .GroupBy(m => m.Factor)
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .ToList();
-
-        if (duplicateFactors.Any())
-        {
-            throw new InvalidOperationException(
-                $"Duplicate meter factors detected: {string.Join(", ", duplicateFactors)}. Each meter must have a unique factor.");
-        }
-
         // Assign display order based on definition order
         var meters = new List<Meter>();
         for (int i = 0; i < config.Meters.Count; i++)

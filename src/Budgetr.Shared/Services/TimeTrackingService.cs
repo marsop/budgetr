@@ -257,19 +257,6 @@ public class TimeTrackingService : ITimeTrackingService
             throw new InvalidOperationException("Import data must contain at least one meter.");
         }
 
-        // Validate no duplicate factors
-        var duplicateFactors = importData.Meters
-            .GroupBy(m => m.Factor)
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .ToList();
-
-        if (duplicateFactors.Any())
-        {
-            throw new InvalidOperationException(
-                $"Duplicate meter factors detected: {string.Join(", ", duplicateFactors)}. Each meter must have a unique factor.");
-        }
-
         // Assign display order based on definition order
         for (int i = 0; i < importData.Meters.Count; i++)
         {
@@ -328,11 +315,11 @@ public class TimeTrackingService : ITimeTrackingService
             throw new ArgumentException("Meter name must be between 1 and 40 characters.");
         }
 
-        // Check for duplicate factor
-        if (_account.Meters.Any(m => Math.Abs(m.Factor - factor) < 0.001))
-        {
-            throw new ArgumentException($"A meter with factor {factor} already exists.");
-        }
+        // Check for duplicate factor - REMOVED per user request
+        // if (_account.Meters.Any(m => Math.Abs(m.Factor - factor) < 0.001))
+        // {
+        //     throw new ArgumentException($"A meter with factor {factor} already exists.");
+        // }
 
         var newMeter = new Meter
         {
