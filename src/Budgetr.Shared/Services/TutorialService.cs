@@ -41,7 +41,7 @@ public class TutorialService : ITutorialService
             new TutorialStep("Here in 'Meters', you define your activities! You can set up 'Meters' for things like Work, Study, or Leisure. Think of them as the pulse of your day.", "meters", "img/tutorial-avatar-3.png"),
             
             // 4. Timeline
-            new TutorialStep("The 'Timeline' is your crystal ball! 🔮 It projects your future time budget based on your recurring activities. Use it to plan ahead and avoid burnout.", "timeline", "img/tutorial-avatar-4.png"),
+            new TutorialStep("The 'Timeline' is your visual aid! 🔮 It projects your past time budget based on your recorded activities. Use it to see trends and plan ahead.", "timeline", "img/tutorial-avatar-4.png"),
             
             // 5. History
             new TutorialStep("Want to see what happened in the past? The 'History' page keeps a log of all your entries and changes. It's great for tracking your activity habits.", "history", "img/tutorial-avatar.png"),
