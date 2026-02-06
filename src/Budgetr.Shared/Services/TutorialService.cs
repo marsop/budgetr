@@ -32,7 +32,7 @@ public class TutorialService : ITutorialService
         _steps = new List<TutorialStep>
         {
             // 1. Intro
-            new TutorialStep("Hi there! Welcome to 'Budgetr'! I'm your personal time budget guide. I'm here to help you get started with managing your time effectively!", "", "img/tutorial-avatar.png"),
+            new TutorialStep("Hi there! Welcome to 'Budgetr'! I'm your personal time budget guide. I'm here to help you get started with managing your time effectively!", "", "img/tutorial-avatar-5.png"),
             
             // 2. Overview
             new TutorialStep("This is your 'Overview'. It gives you a quick snapshot of your current temporal budget health. You can see your total time balance and active meters at a glance.", "", "img/tutorial-avatar-2.png"),
