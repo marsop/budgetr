@@ -174,28 +174,28 @@ html, body {
 }
 
 .nav-icon-overview {
-    -webkit-mask-image: url('../../img/nav/overview.svg');
-    mask-image: url('../../img/nav/overview.svg');
+    -webkit-mask-image: url('/img/nav/overview.svg');
+    mask-image: url('/img/nav/overview.svg');
 }
 
 .nav-icon-meters {
-    -webkit-mask-image: url('../../img/nav/meters.svg');
-    mask-image: url('../../img/nav/meters.svg');
+    -webkit-mask-image: url('/img/nav/meters.svg');
+    mask-image: url('/img/nav/meters.svg');
 }
 
 .nav-icon-timeline {
-    -webkit-mask-image: url('../../img/nav/timeline.svg');
-    mask-image: url('../../img/nav/timeline.svg');
+    -webkit-mask-image: url('/img/nav/timeline.svg');
+    mask-image: url('/img/nav/timeline.svg');
 }
 
 .nav-icon-history {
-    -webkit-mask-image: url('../../img/nav/history.svg');
-    mask-image: url('../../img/nav/history.svg');
+    -webkit-mask-image: url('/img/nav/history.svg');
+    mask-image: url('/img/nav/history.svg');
 }
 
 .nav-icon-sync {
-    -webkit-mask-image: url('../../img/nav/sync.svg');
-    mask-image: url('../../img/nav/sync.svg');
+    -webkit-mask-image: url('/img/nav/sync.svg');
+    mask-image: url('/img/nav/sync.svg');
 }
 
 .nav-label {
