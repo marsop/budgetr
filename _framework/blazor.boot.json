@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Budgetr.Web",
   "resources": {
-    "hash": "sha256-htNsvSU7V9TVCwnY627g7ElXUgbmEAc8PC3MhmNbcQk=",
+    "hash": "sha256-0kfwI2zqiMU6MeYy8nawSffMMIhYB0nJj8+H/Y6N0O0=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.narvlfhdd2.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Web.ywr86sm3h4.wasm": "Microsoft.AspNetCore.Components.Web.wasm",
@@ -38,8 +38,8 @@
       "System.Text.RegularExpressions.vbr1gezq3a.wasm": "System.Text.RegularExpressions.wasm",
       "System.Threading.n5ppejuuhz.wasm": "System.Threading.wasm",
       "System.Private.CoreLib.sordoogycj.wasm": "System.Private.CoreLib.wasm",
-      "Budgetr.Shared.8yhd9bg27q.wasm": "Budgetr.Shared.wasm",
-      "Budgetr.Web.8tx1fsie36.wasm": "Budgetr.Web.wasm",
+      "Budgetr.Shared.7b40aazgu2.wasm": "Budgetr.Shared.wasm",
+      "Budgetr.Web.uqphclyep9.wasm": "Budgetr.Web.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.xidrk0eo52.js": "dotnet.native.js",
       "dotnet.native.y68cfu4kuf.wasm": "dotnet.native.wasm",
@@ -100,8 +100,8 @@
       "System.Text.Json.2687u7bq87.wasm": "sha256-5lCzE5kUJvSh2kxjDyQDt18ilDPTu+iWwZagxlc4afg=",
       "System.Text.RegularExpressions.vbr1gezq3a.wasm": "sha256-ZQejR0x7+S2JJA2Z1IkLWqWXukLRjL/c/zguib2fpHo=",
       "System.Threading.n5ppejuuhz.wasm": "sha256-ZVqAdmVQkqedPOVid8yORJq6/P4I+NlvR19QR4PIQfY=",
-      "Budgetr.Shared.8yhd9bg27q.wasm": "sha256-INHBBO69i60BHbJL4gGFE8ymKfctHalUM4TylXBYiOc=",
-      "Budgetr.Web.8tx1fsie36.wasm": "sha256-bGB9N7VZcdhOkldo+061ZVhX+cMzZ+gc1M7AGxAW0fo="
+      "Budgetr.Shared.7b40aazgu2.wasm": "sha256-0/cD9gYfzmtONP2Pon/64r2laUrKQo2vgpGFV1oFguI=",
+      "Budgetr.Web.uqphclyep9.wasm": "sha256-asPL7pOcc/S4mejOesvmxCY7yBWzMKtXEIJR5sK7NOo="
     }
   },
   "cacheBootResources": true,
