@@ -16,6 +16,7 @@ builder.Services.AddScoped<IMeterConfigurationService, MeterConfigurationService
 builder.Services.AddScoped<ITimeTrackingService, TimeTrackingService>();
 builder.Services.AddScoped<GoogleDriveService>();
 builder.Services.AddScoped<IAutoSyncService, AutoSyncService>();
+builder.Services.AddScoped<IPwaService, PwaService>();
 
 var host = builder.Build();
 

@@ -1,7 +1,32 @@
 @inherits LayoutComponentBase
+@using Budgetr.Shared.Services
+@inject IPwaService PwaService
+@implements IDisposable
 
 <div class="app-container">
     <main class="main-content">
+        @if (!PwaService.IsOnline)
+        {
+            <div class="offline-banner">
+                <span class="offline-icon">📡</span>
+                <span>You are working offline</span>
+            </div>
+        }
+        
+        @if (PwaService.IsInstallable)
+        {
+            <div class="install-prompt">
+                <div class="install-content">
+                    <span class="install-icon">📱</span>
+                    <div class="install-text">
+                        <span class="install-title">Install Budgetr</span>
+                        <span class="install-desc">Add to home screen for quick access</span>
+                    </div>
+                </div>
+                <button class="install-btn" @onclick="InstallApp">Install</button>
+            </div>
+        }
+
         @Body
     </main>
     
@@ -28,3 +53,22 @@
         </NavLink>
     </nav>
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        PwaService.OnStateChanged += StateHasChanged;
+        
+        await PwaService.InitializeAsync();
+    }
+
+    private async Task InstallApp()
+    {
+        await PwaService.InstallAppAsync();
+    }
+
+    public void Dispose()
+    {
+        PwaService.OnStateChanged -= StateHasChanged;
+    }
+}

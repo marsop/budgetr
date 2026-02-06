@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Budgetr.Maui.Services;
+using Budgetr.Shared.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Budgetr.Maui;
 
@@ -15,6 +17,7 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddMauiBlazorWebView();
+        builder.Services.AddSingleton<IPwaService, MobilePwaService>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
