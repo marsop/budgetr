@@ -177,28 +177,28 @@ body {
 }
 
 .nav-icon-overview {
-    -webkit-mask-image: url('/_content/Budgetr.Shared/img/nav/overview.svg');
-    mask-image: url('/_content/Budgetr.Shared/img/nav/overview.svg');
+    -webkit-mask-image: url('/_content/Budgetr.Shared/img/overview.svg');
+    mask-image: url('/_content/Budgetr.Shared/img/overview.svg');
 }
 
 .nav-icon-meters {
-    -webkit-mask-image: url('/_content/Budgetr.Shared/img/nav/meters.svg');
-    mask-image: url('/_content/Budgetr.Shared/img/nav/meters.svg');
+    -webkit-mask-image: url('/_content/Budgetr.Shared/img/meters.svg');
+    mask-image: url('/_content/Budgetr.Shared/img/meters.svg');
 }
 
 .nav-icon-timeline {
-    -webkit-mask-image: url('/_content/Budgetr.Shared/img/nav/timeline.svg');
-    mask-image: url('/_content/Budgetr.Shared/img/nav/timeline.svg');
+    -webkit-mask-image: url('/_content/Budgetr.Shared/img/timeline.svg');
+    mask-image: url('/_content/Budgetr.Shared/img/timeline.svg');
 }
 
 .nav-icon-history {
-    -webkit-mask-image: url('/_content/Budgetr.Shared/img/nav/history.svg');
-    mask-image: url('/_content/Budgetr.Shared/img/nav/history.svg');
+    -webkit-mask-image: url('/_content/Budgetr.Shared/img/history.svg');
+    mask-image: url('/_content/Budgetr.Shared/img/history.svg');
 }
 
 .nav-icon-sync {
-    -webkit-mask-image: url('/_content/Budgetr.Shared/img/nav/sync.svg');
-    mask-image: url('/_content/Budgetr.Shared/img/nav/sync.svg');
+    -webkit-mask-image: url('/_content/Budgetr.Shared/img/sync.svg');
+    mask-image: url('/_content/Budgetr.Shared/img/sync.svg');
 }
 
 .nav-label {
