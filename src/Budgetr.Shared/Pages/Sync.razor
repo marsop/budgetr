@@ -172,6 +172,27 @@
             @statusMessage
         </div>
     }
+    
+    <Budgetr.Shared.Components.ConfirmationDialog 
+        IsVisible="@showConfirmation1" 
+        Title="Factory Reset" 
+        Message="Are you sure you want to reset the application? This will effectively delete ALL your data and cannot be undone." 
+        OnClose="OnConfirm1" />
+        
+    <Budgetr.Shared.Components.ConfirmationDialog 
+        IsVisible="@showConfirmation2" 
+        Title="FINAL WARNING" 
+        Message="I am serious. This will wipe all meters, history, and settings. Are you absolutely sure?" 
+        OnClose="OnConfirm2" />
+
+    <div class="sync-section danger-zone">
+        <h3>Factory Reset</h3>
+        <p class="section-description">Reset the application to its initial state. Deletes all data.</p>
+        <button class="sync-button reset-btn" @onclick="RequestReset">
+            <span class="btn-icon">⚠️</span>
+            <span>Reset Application</span>
+        </button>
+    </div>
 </div>
 
 @code {
@@ -548,5 +569,58 @@
     public void Dispose()
     {
         AutoSyncService.OnStatusChanged -= OnAutoSyncStatusChanged;
+    }
+
+    // Reset Logic
+    private bool showConfirmation1;
+    private bool showConfirmation2;
+
+    [Inject] private ITutorialService TutorialService { get; set; } = default!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+
+    private void RequestReset()
+    {
+        showConfirmation1 = true;
+        StateHasChanged();
+    }
+
+    private void OnConfirm1(bool confirmed)
+    {
+        showConfirmation1 = false;
+        if (confirmed)
+        {
+            showConfirmation2 = true;
+        }
+        StateHasChanged();
+    }
+
+    private async Task OnConfirm2(bool confirmed)
+    {
+        showConfirmation2 = false;
+        if (confirmed)
+        {
+            await PerformReset();
+        }
+        StateHasChanged();
+    }
+
+    private async Task PerformReset()
+    {
+        try 
+        {
+            // 1. Reset Time/Meter Data
+            await TimeService.ResetDataAsync();
+            
+            // 2. Reset Tutorial
+            await TutorialService.ResetTutorialAsync();
+            
+            // 3. Navigate to Home to start fresh (and trigger tutorial)
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+             statusMessage = $"Reset failed: {ex.Message}";
+             statusClass = "error";
+        }
     }
 }

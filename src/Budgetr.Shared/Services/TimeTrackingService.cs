@@ -332,6 +332,17 @@ public class TimeTrackingService : ITimeTrackingService
         OnStateChanged?.Invoke();
         _ = SaveAsync();
     }
+    public async Task ResetDataAsync()
+    {
+        _account.Events.Clear();
+        _account.Meters = await _meterConfig.LoadMetersAsync();
+        
+        // Reset timeline period to default
+        _account.TimelinePeriod = TimeSpan.FromHours(24);
+        
+        OnStateChanged?.Invoke();
+        await SaveAsync();
+    }
 }
 
 /// <summary>

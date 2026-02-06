@@ -17,6 +17,7 @@ builder.Services.AddScoped<ITimeTrackingService, TimeTrackingService>();
 builder.Services.AddScoped<GoogleDriveService>();
 builder.Services.AddScoped<IAutoSyncService, AutoSyncService>();
 builder.Services.AddScoped<IPwaService, PwaService>();
+builder.Services.AddScoped<ITutorialService, TutorialService>();
 
 var host = builder.Build();
 

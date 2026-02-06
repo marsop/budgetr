@@ -95,6 +95,10 @@ public interface ITimeTrackingService
     /// <param name="factor">Factor for the meter.</param>
     /// <exception cref="ArgumentException">Thrown when name is invalid or factor is duplicate/invalid.</exception>
     void AddMeter(string name, double factor);
+    /// <summary>
+    /// Resets all data to initial state (default meters, no history).
+    /// </summary>
+    Task ResetDataAsync();
 }
 
 /// <summary>
