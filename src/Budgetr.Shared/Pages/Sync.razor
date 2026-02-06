@@ -615,7 +615,7 @@
             await TutorialService.ResetTutorialAsync();
             
             // 3. Navigate to Home to start fresh (and trigger tutorial)
-            NavigationManager.NavigateTo("/", forceLoad: true);
+            NavigationManager.NavigateTo("", forceLoad: true);
         }
         catch (Exception ex)
         {
