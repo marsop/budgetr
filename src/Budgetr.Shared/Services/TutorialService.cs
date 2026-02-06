@@ -32,22 +32,22 @@ public class TutorialService : ITutorialService
         _steps = new List<TutorialStep>
         {
             // 1. Intro
-            new TutorialStep("Hi there! Welcome to **Budgetr**! I'm your personal time budget guide. I'm here to help you get started with managing your time effectively!", "", "img/tutorial-avatar.png"),
+            new TutorialStep("Hi there! Welcome to 'Budgetr'! I'm your personal time budget guide. I'm here to help you get started with managing your time effectively!", "", "img/tutorial-avatar.png"),
             
             // 2. Overview
-            new TutorialStep("This is your **Overview**. It gives you a quick snapshot of your current temporal budget health. You can see your total time balance and active meters at a glance.", "", "img/tutorial-avatar-2.png"),
+            new TutorialStep("This is your 'Overview'. It gives you a quick snapshot of your current temporal budget health. You can see your total time balance and active meters at a glance.", "", "img/tutorial-avatar-2.png"),
             
             // 3. Meters
-            new TutorialStep("Here in **Meters**, you define your activities! You can set up 'Meters' for things like Work, Study, or Leisure. Think of them as the pulse of your day.", "meters", "img/tutorial-avatar-3.png"),
+            new TutorialStep("Here in 'Meters', you define your activities! You can set up 'Meters' for things like Work, Study, or Leisure. Think of them as the pulse of your day.", "meters", "img/tutorial-avatar-3.png"),
             
             // 4. Timeline
-            new TutorialStep("The **Timeline** is your crystal ball! 🔮 It projects your future time budget based on your recurring activities. Use it to plan ahead and avoid burnout.", "timeline", "img/tutorial-avatar-4.png"),
+            new TutorialStep("The 'Timeline' is your crystal ball! 🔮 It projects your future time budget based on your recurring activities. Use it to plan ahead and avoid burnout.", "timeline", "img/tutorial-avatar-4.png"),
             
             // 5. History
-            new TutorialStep("Want to see what happened in the past? The **History** page keeps a log of all your entries and changes. It's great for tracking your activity habits.", "history", "img/tutorial-avatar.png"),
+            new TutorialStep("Want to see what happened in the past? The 'History' page keeps a log of all your entries and changes. It's great for tracking your activity habits.", "history", "img/tutorial-avatar.png"),
             
             // 6. Sync
-            new TutorialStep("Finally, **Sync** keeps your data safe! You can back up your time tracking data to Google Drive or export it locally. Never lose your progress!", "sync", "img/tutorial-avatar-2.png"),
+            new TutorialStep("Finally, 'Sync' keeps your data safe! You can back up your time tracking data to Google Drive or export it locally. Never lose your progress!", "sync", "img/tutorial-avatar-2.png"),
             
             // 7. Completion
             new TutorialStep("That's the basics! You're all set to take control of your time. If you need me again, just look for the help icon. Happy tracking! ✨", "", "img/tutorial-avatar-3.png")
