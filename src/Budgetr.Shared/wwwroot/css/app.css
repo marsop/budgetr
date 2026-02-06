@@ -153,7 +153,49 @@ html, body {
 }
 
 .nav-icon {
-    font-size: var(--font-size-lg);
+    width: 24px;
+    height: 24px;
+    background-color: var(--color-text-muted);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    transition: background-color var(--transition-normal);
+}
+
+.nav-item:hover .nav-icon {
+    background-color: var(--color-text-secondary);
+}
+
+.nav-item.active .nav-icon {
+    background-color: var(--color-accent);
+}
+
+.nav-icon-overview {
+    -webkit-mask-image: url('/img/nav/overview.svg');
+    mask-image: url('/img/nav/overview.svg');
+}
+
+.nav-icon-meters {
+    -webkit-mask-image: url('/img/nav/meters.svg');
+    mask-image: url('/img/nav/meters.svg');
+}
+
+.nav-icon-timeline {
+    -webkit-mask-image: url('/img/nav/timeline.svg');
+    mask-image: url('/img/nav/timeline.svg');
+}
+
+.nav-icon-history {
+    -webkit-mask-image: url('/img/nav/history.svg');
+    mask-image: url('/img/nav/history.svg');
+}
+
+.nav-icon-sync {
+    -webkit-mask-image: url('/img/nav/sync.svg');
+    mask-image: url('/img/nav/sync.svg');
 }
 
 .nav-label {
