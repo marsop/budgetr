@@ -24,4 +24,6 @@ public interface ISettingsService
     /// Saves current settings to persistent storage.
     /// </summary>
     Task SaveAsync();
+
+    Task SetLanguageAsync(string language);
 }

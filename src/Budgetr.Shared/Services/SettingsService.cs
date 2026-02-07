@@ -14,6 +14,17 @@ public class SettingsService : ISettingsService
 
     private string _language = DefaultLanguage;
 
+    public async Task SetLanguageAsync(string language)
+    {
+        if (_language != language)
+        {
+            _language = language;
+            UpdateCulture(language);
+            OnSettingsChanged?.Invoke();
+            await SaveAsync();
+        }
+    }
+
     public string Language
     {
         get => _language;
@@ -21,10 +32,7 @@ public class SettingsService : ISettingsService
         {
             if (_language != value)
             {
-                _language = value;
-                UpdateCulture(value);
-                OnSettingsChanged?.Invoke();
-                _ = SaveAsync();
+                _ = SetLanguageAsync(value);
             }
         }
     }
@@ -64,12 +72,17 @@ public class SettingsService : ISettingsService
     {
         try
         {
+            Console.WriteLine($"[SettingsService] Updating culture to '{languageCode}'");
             var culture = new CultureInfo(languageCode);
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+            Console.WriteLine($"[SettingsService] Culture set to: {CultureInfo.CurrentCulture.Name}, UI: {CultureInfo.CurrentUICulture.Name}");
         }
-        catch (CultureNotFoundException)
+        catch (CultureNotFoundException ex)
         {
+            Console.WriteLine($"[SettingsService] Culture '{languageCode}' not found: {ex.Message}. Falling back to default.");
             // Fallback to default if culture code is invalid
             var defaultCulture = new CultureInfo(DefaultLanguage);
             CultureInfo.DefaultThreadCurrentCulture = defaultCulture;

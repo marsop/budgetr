@@ -1,6 +1,7 @@
 @page "/settings"
 @using Budgetr.Shared.Services
 @inject ISettingsService SettingsService
+@inject NavigationManager NavigationManager
 @inject IStringLocalizer<Strings> Localizer
 @implements IDisposable
 
@@ -49,17 +50,22 @@
         isDropdownOpen = !isDropdownOpen;
     }
 
-    private void SelectLanguage(string code)
+    private async Task SelectLanguage(string code)
     {
-        SelectedLanguage = code;
+        if (SelectedLanguage == code) 
+        {
+            isDropdownOpen = false;
+            return;
+        }
+
+        await SettingsService.SetLanguageAsync(code);
         isDropdownOpen = false;
+        
+        // Force reload to apply language changes
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
-    private string SelectedLanguage
-    {
-        get => SettingsService.Language;
-        set => SettingsService.Language = value;
-    }
+    private string SelectedLanguage => SettingsService.Language;
 
     private record LanguageOption(string Name, string Code, RenderFragment Flag);
 
