@@ -174,26 +174,7 @@
         </div>
     }
     
-    <Budgetr.Shared.Components.ConfirmationDialog 
-        IsVisible="@showConfirmation1" 
-        Title="@Localizer["FactoryReset"]" 
-        Message="@Localizer["PromptReset"]" 
-        OnClose="OnConfirm1" />
-        
-    <Budgetr.Shared.Components.ConfirmationDialog 
-        IsVisible="@showConfirmation2" 
-        Title="@Localizer["FinalWarning"]" 
-        Message="@Localizer["FinalWarningMsg"]" 
-        OnClose="OnConfirm2" />
 
-    <div class="sync-section danger-zone">
-        <h3>@Localizer["FactoryReset"]</h3>
-        <p class="section-description">@Localizer["FactoryResetDesc"]</p>
-        <button class="sync-button reset-btn" @onclick="RequestReset">
-            <span class="btn-icon">⚠️</span>
-            <span>@Localizer["ResetApp"]</span>
-        </button>
-    </div>
 </div>
 
 @code {
@@ -250,7 +231,7 @@
                 {
                     googleUserEmail = await JS.InvokeAsync<string?>("googleDriveInterop.getUserEmail");
                     await RefreshBackupInfo();
-                    await RefreshAutoSyncState();
+                    RefreshAutoSyncState();
                 }
                 
                 StateHasChanged();
@@ -549,7 +530,7 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private async Task RefreshAutoSyncState()
+    private void RefreshAutoSyncState()
     {
         isAutoSyncEnabled = AutoSyncService.IsEnabled;
         autoSyncStatus = AutoSyncService.Status;
@@ -572,56 +553,5 @@
         AutoSyncService.OnStatusChanged -= OnAutoSyncStatusChanged;
     }
 
-    // Reset Logic
-    private bool showConfirmation1;
-    private bool showConfirmation2;
 
-    [Inject] private ITutorialService TutorialService { get; set; } = default!;
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-
-    private void RequestReset()
-    {
-        showConfirmation1 = true;
-        StateHasChanged();
-    }
-
-    private void OnConfirm1(bool confirmed)
-    {
-        showConfirmation1 = false;
-        if (confirmed)
-        {
-            showConfirmation2 = true;
-        }
-        StateHasChanged();
-    }
-
-    private async Task OnConfirm2(bool confirmed)
-    {
-        showConfirmation2 = false;
-        if (confirmed)
-        {
-            await PerformReset();
-        }
-        StateHasChanged();
-    }
-
-    private async Task PerformReset()
-    {
-        try 
-        {
-            // 1. Reset Time/Meter Data
-            await TimeService.ResetDataAsync();
-            
-            // 2. Reset Tutorial
-            await TutorialService.ResetTutorialAsync();
-            
-            // 3. Navigate to Home to start fresh (and trigger tutorial)
-            NavigationManager.NavigateTo("", forceLoad: true);
-        }
-        catch (Exception ex)
-        {
-             statusMessage = Localizer["ErrorResetFailed", ex.Message];
-             statusClass = "error";
-        }
-    }
 }
