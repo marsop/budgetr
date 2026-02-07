@@ -10,13 +10,23 @@
         <h2 class="section-title">Language</h2>
         <div class="setting-item">
             <span class="setting-label">Display Language</span>
-            <select class="setting-select" @bind="SelectedLanguage">
-                <option value="en">English</option>
-                <option value="de">Deutsch</option>
-                <option value="es">Español</option>
-                <option value="gl">Galego</option>
-                <option value="vo">Vorarlbergerisch</option>
-            </select>
+            <div class="language-dropdown">
+                <button type="button" class="dropdown-trigger" @onclick="ToggleDropdown">
+                    <span class="flag-icon">@GetFlag(SelectedLanguage)</span>
+                    <span>@GetLanguageName(SelectedLanguage)</span>
+                </button>
+                <div class="dropdown-menu @(isDropdownOpen ? "show" : "")">
+                    @foreach (var lang in Languages)
+                    {
+                        <div class="dropdown-item @(SelectedLanguage == lang.Code ? "selected" : "")" 
+                             @onclick="() => SelectLanguage(lang.Code)" 
+                             @onclick:stopPropagation="true">
+                            <span class="flag-icon">@lang.Flag</span>
+                            <span>@lang.Name</span>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 
@@ -30,11 +40,45 @@
 </div>
 
 @code {
+    private bool isDropdownOpen = false;
+    private ElementReference dropdownRef;
+
+    private void ToggleDropdown()
+    {
+        isDropdownOpen = !isDropdownOpen;
+    }
+
+    private void SelectLanguage(string code)
+    {
+        SelectedLanguage = code;
+        isDropdownOpen = false;
+    }
+
     private string SelectedLanguage
     {
         get => SettingsService.Language;
         set => SettingsService.Language = value;
     }
+
+    private record LanguageOption(string Name, string Code, RenderFragment Flag);
+
+    private static readonly RenderFragment FlagEn = @<svg viewBox="0 0 640 480"><rect width="640" height="480" fill="#012169"/><path d="M75 0l245 180L565 0h75v60L395 240l245 180v60h-75L320 300 75 480H0v-60l245-180L0 60V0h75z" fill="#fff"/><path d="M424 281l216 159v40L369 281h55zM216 199L0 41v40l161 118h55zm0 82L0 439v40l216-159v-40zm208-82l216-159V41L424 199h0z" fill="#C8102E"/><path d="M240 0v480h160V0H240zM0 160v160h640V160H0z" fill="#fff"/><path d="M280 0v480h80V0h-80zM0 200v80h640v-80H0z" fill="#C8102E"/></svg>;
+    private static readonly RenderFragment FlagDe = @<svg viewBox="0 0 5 3"><rect width="5" height="3" y="0" fill="#000"/><rect width="5" height="2" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg>;
+    private static readonly RenderFragment FlagEs = @<svg viewBox="0 0 750 500"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/><path d="M120 150 a60 60 0 0 0 0 120 v30 a30 30 0 0 0 60 0 v-30 a60 60 0 0 0 0 -120 z" fill="#c60b1e" opacity="0.5"/></svg>;
+    private static readonly RenderFragment FlagGl = @<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><path d="M0 2L3 0" stroke="#009edb" stroke-width="0.4"/></svg>;
+    private static readonly RenderFragment FlagVo = @<svg viewBox="0 0 2 1"><rect width="2" height="1" fill="#fff"/><rect width="2" height="0.5" y="0.5" fill="#f00"/></svg>;
+
+    private List<LanguageOption> Languages = new()
+    {
+        new("English", "en", FlagEn),
+        new("Deutsch", "de", FlagDe),
+        new("Español", "es", FlagEs),
+        new("Galego", "gl", FlagGl),
+        new("Vorarlbergerisch", "vo", FlagVo)
+    };
+
+    private string GetLanguageName(string code) => Languages.FirstOrDefault(l => l.Code == code)?.Name ?? "English";
+    private RenderFragment GetFlag(string code) => Languages.FirstOrDefault(l => l.Code == code)?.Flag ?? FlagEn;
 
     protected override void OnInitialized()
     {
