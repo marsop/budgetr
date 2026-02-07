@@ -1,0 +1,48 @@
+@page "/settings"
+@using Budgetr.Shared.Services
+@inject ISettingsService SettingsService
+@implements IDisposable
+
+<div class="settings-page">
+    <h1 class="page-title">Settings</h1>
+    
+    <div class="settings-section">
+        <h2 class="section-title">Language</h2>
+        <div class="setting-item">
+            <span class="setting-label">Display Language</span>
+            <select class="setting-select" @bind="SelectedLanguage">
+                <option value="en">English</option>
+                <option value="de">Deutsch</option>
+                <option value="es">Español</option>
+                <option value="gl">Galego</option>
+                <option value="vo">Vorarlbergerisch</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h2 class="section-title">About</h2>
+        <div class="setting-item">
+            <span class="setting-label">Version</span>
+            <span class="setting-value">1.0.0</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string SelectedLanguage
+    {
+        get => SettingsService.Language;
+        set => SettingsService.Language = value;
+    }
+
+    protected override void OnInitialized()
+    {
+        SettingsService.OnSettingsChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        SettingsService.OnSettingsChanged -= StateHasChanged;
+    }
+}
