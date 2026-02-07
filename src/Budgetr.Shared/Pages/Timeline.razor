@@ -1,10 +1,12 @@
 @page "/timeline"
 @using Budgetr.Shared.Services
+@using Budgetr.Shared.Resources
 @inject ITimeTrackingService TimeService
+@inject IStringLocalizer<Strings> Localizer
 @implements IDisposable
 
 <div class="timeline-page">
-    <h2 class="page-title">Timeline</h2>
+    <h2 class="page-title">@Localizer["NavTimeline"]</h2>
     
     <div class="period-selector">
         @foreach (var period in Periods)
@@ -213,7 +215,7 @@
         else
         {
             // Show "no data" message but keep the grid
-            sb.Append(@"<text x=""400"" y=""200"" text-anchor=""middle"" fill=""#666"" font-size=""16"">No data for selected period</text>");
+            sb.Append($@"<text x=""400"" y=""200"" text-anchor=""middle"" fill=""#666"" font-size=""16"">{Localizer["NoDataPeriod"]}</text>");
         }
         
         sb.Append("</svg>");

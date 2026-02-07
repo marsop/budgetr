@@ -1,15 +1,16 @@
 @page "/settings"
 @using Budgetr.Shared.Services
 @inject ISettingsService SettingsService
+@inject IStringLocalizer<Strings> Localizer
 @implements IDisposable
 
 <div class="settings-page">
-    <h1 class="page-title">Settings</h1>
+    <h1 class="page-title">@Localizer["NavSettings"]</h1>
     
     <div class="settings-section">
-        <h2 class="section-title">Language</h2>
+        <h2 class="section-title">@Localizer["NavSettings"]</h2>
         <div class="setting-item">
-            <span class="setting-label">Display Language</span>
+            <span class="setting-label">@Localizer["DisplayLanguage"]</span>
             <div class="language-dropdown">
                 <button type="button" class="dropdown-trigger" @onclick="ToggleDropdown">
                     <span class="flag-icon">@GetFlag(SelectedLanguage)</span>
@@ -31,9 +32,9 @@
     </div>
 
     <div class="settings-section">
-        <h2 class="section-title">About</h2>
+        <h2 class="section-title">@Localizer["About"]</h2>
         <div class="setting-item">
-            <span class="setting-label">Version</span>
+            <span class="setting-label">@Localizer["Version"]</span>
             <span class="setting-value">1.0.0</span>
         </div>
     </div>

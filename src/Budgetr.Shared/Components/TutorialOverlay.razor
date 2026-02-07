@@ -1,20 +1,24 @@
-@namespace Budgetr.Shared.Components
+@using Budgetr.Shared.Services
+@using Budgetr.Shared.Resources
+@inject ITutorialService TutorialService
+@inject IStringLocalizer<Strings> Localizer
+@implements IDisposable
 
 <div class="tutorial-overlay @(IsVisible ? "visible" : "hidden")">
     @if (IsVisible)
     {
         <div class="tutorial-container">
             <div class="avatar-container">
-                <img src="@CurrentImage" alt="Guide" class="avatar-image" />
+                <img src="@CurrentImage" alt="@Localizer["TutorialGuideName"]" class="avatar-image" />
             </div>
             
             <div class="dialogue-box">
                 <div class="dialogue-content">
-                    <h3 class="character-name">Guide</h3>
+                    <h3 class="character-name">@Localizer["TutorialGuideName"]</h3>
                     <p class="dialogue-text">@CurrentText</p>
                 </div>
                 <div class="dialogue-actions">
-                    <button class="btn-next" @onclick="NextStep">Next ▶</button>
+                    <button class="btn-next" @onclick="NextStep">@Localizer["NextStep"] ▶</button>
                 </div>
             </div>
         </div>
@@ -141,10 +145,6 @@
         }
     }
 </style>
-
-@using Budgetr.Shared.Services
-@inject ITutorialService TutorialService
-@implements IDisposable
 
 @code {
     private bool IsVisible => TutorialService.IsActive;

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Globalization;
 
 namespace Budgetr.Shared.Services;
 
@@ -21,6 +22,7 @@ public class SettingsService : ISettingsService
             if (_language != value)
             {
                 _language = value;
+                UpdateCulture(value);
                 OnSettingsChanged?.Invoke();
                 _ = SaveAsync();
             }
@@ -53,7 +55,26 @@ public class SettingsService : ISettingsService
                 _language = DefaultLanguage;
             }
         }
+        
+        UpdateCulture(_language);
         OnSettingsChanged?.Invoke();
+    }
+
+    private void UpdateCulture(string languageCode)
+    {
+        try
+        {
+            var culture = new CultureInfo(languageCode);
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+        }
+        catch (CultureNotFoundException)
+        {
+            // Fallback to default if culture code is invalid
+            var defaultCulture = new CultureInfo(DefaultLanguage);
+            CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
+        }
     }
 
     public async Task SaveAsync()

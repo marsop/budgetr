@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using Microsoft.Extensions.Localization;
+using Budgetr.Shared.Resources;
 
 namespace Budgetr.Shared.Services;
 
@@ -9,6 +11,7 @@ public class TutorialService : ITutorialService
 {
     private readonly IStorageService _storageService;
     private readonly NavigationManager _navigationManager;
+    private readonly IStringLocalizer<Strings> _localizer;
     private const string TutorialCompletedKey = "tutorial_completed_v1";
     
     private int _currentStepIndex = -1;
@@ -19,10 +22,11 @@ public class TutorialService : ITutorialService
 
     public event Action? OnChange;
 
-    public TutorialService(IStorageService storageService, NavigationManager navigationManager)
+    public TutorialService(IStorageService storageService, NavigationManager navigationManager, IStringLocalizer<Strings> localizer)
     {
         _storageService = storageService;
         _navigationManager = navigationManager;
+        _localizer = localizer;
         
         InitializeSteps();
     }
@@ -32,25 +36,25 @@ public class TutorialService : ITutorialService
         _steps = new List<TutorialStep>
         {
             // 1. Intro
-            new TutorialStep("Hi there! Welcome to 'Budgetr'! I'm your personal time budget guide. I'm here to help you get started with managing your time effectively!", "", "img/tutorial-avatar-5.png"),
+            new TutorialStep(_localizer["TutorialIntro"], "", "img/tutorial-avatar-5.png"),
             
             // 2. Overview
-            new TutorialStep("This is your 'Overview'. It gives you a quick snapshot of your current temporal budget health. You can see your total time balance and active meters at a glance.", "", "img/tutorial-avatar-2.png"),
+            new TutorialStep(_localizer["TutorialOverview"], "", "img/tutorial-avatar-2.png"),
             
             // 3. Meters
-            new TutorialStep("Here in 'Meters', you define your activities! You can set up 'Meters' for things like Work, Study, or Leisure. Think of them as the pulse of your day.", "meters", "img/tutorial-avatar-3.png"),
+            new TutorialStep(_localizer["TutorialMeters"], "meters", "img/tutorial-avatar-3.png"),
             
             // 4. Timeline
-            new TutorialStep("The 'Timeline' is your visual aid! 🔮 It projects your past time budget based on your recorded activities. Use it to see trends and plan ahead.", "timeline", "img/tutorial-avatar-4.png"),
+            new TutorialStep(_localizer["TutorialTimeline"], "timeline", "img/tutorial-avatar-4.png"),
             
             // 5. History
-            new TutorialStep("Want to see what happened in the past? The 'History' page keeps a log of all your entries and changes. It's great for tracking your activity habits.", "history", "img/tutorial-avatar.png"),
+            new TutorialStep(_localizer["TutorialHistory"], "history", "img/tutorial-avatar.png"),
             
             // 6. Sync
-            new TutorialStep("Finally, 'Sync' keeps your data safe! You can back up your time tracking data to Google Drive or export it locally. Never lose your progress!", "sync", "img/tutorial-avatar-2.png"),
+            new TutorialStep(_localizer["TutorialSync"], "sync", "img/tutorial-avatar-2.png"),
             
             // 7. Completion
-            new TutorialStep("That's the basics! You're all set to take control of your time. If you need me again, just look for the help icon. Happy tracking! ✨", "", "img/tutorial-avatar-3.png")
+            new TutorialStep(_localizer["TutorialCompletion"], "", "img/tutorial-avatar-3.png")
         };
     }
 

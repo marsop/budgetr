@@ -1,18 +1,20 @@
 @page "/history"
 @using Budgetr.Shared.Services
 @using Budgetr.Shared.Models
+@using Budgetr.Shared.Resources
 @inject ITimeTrackingService TimeService
+@inject IStringLocalizer<Strings> Localizer
 @implements IDisposable
 
 <div class="history-page">
-    <h1 class="page-title">History</h1>
+    <h1 class="page-title">@Localizer["NavHistory"]</h1>
     
     @if (!Events.Any())
     {
         <div class="empty-state">
             <span class="empty-icon">📭</span>
-            <p>No events recorded yet</p>
-            <p class="empty-hint">Start a meter to begin tracking time</p>
+            <p>@Localizer["NoEvents"]</p>
+            <p class="empty-hint">@Localizer["StartMeterHint"]</p>
         </div>
     }
     else
@@ -28,12 +30,12 @@
                             {
                                 <span class="event-badge active-badge">
                                     <span class="pulse"></span>
-                                    Active
+                                    @Localizer["Active"]
                                 </span>
                             }
                             @if (!evt.IsActive)
                             {
-                                <button class="delete-btn" @onclick="() => ConfirmDelete(evt)" title="Delete entry">
+                                <button class="delete-btn" @onclick="() => ConfirmDelete(evt)" title="@Localizer["DeleteMeter"]">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="3 6 5 6 21 6"></polyline>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -47,13 +49,13 @@
                     
                     <div class="event-times">
                         <div class="event-time">
-                            <span class="time-label">Started</span>
+                            <span class="time-label">@Localizer["Started"]</span>
                             <span class="time-value">@FormatDateTime(evt.StartTime)</span>
                         </div>
                         @if (evt.EndTime.HasValue)
                         {
                             <div class="event-time">
-                                <span class="time-label">Ended</span>
+                                <span class="time-label">@Localizer["Ended"]</span>
                                 <span class="time-value">@FormatDateTime(evt.EndTime.Value)</span>
                             </div>
                         }
@@ -61,11 +63,11 @@
                     
                     <div class="event-stats">
                         <div class="event-stat">
-                            <span class="stat-label">Duration</span>
+                            <span class="stat-label">@Localizer["Duration"]</span>
                             <span class="stat-value">@FormatDuration(evt.Duration)</span>
                         </div>
                         <div class="event-stat">
-                            <span class="stat-label">Contribution</span>
+                            <span class="stat-label">@Localizer["Contribution"]</span>
                             <span class="stat-value contribution @(evt.TimeContribution.TotalHours >= 0 ? "positive" : "negative")">
                                 @FormatContribution(evt.TimeContribution)
                             </span>
@@ -81,12 +83,12 @@
 {
     <div class="modal-overlay" @onclick="CancelDelete">
         <div class="modal-dialog" @onclick:stopPropagation="true">
-            <h3>Delete Entry?</h3>
-            <p>Are you sure you want to delete this <strong>@_eventToDelete.MeterName</strong> entry?</p>
-            <p class="modal-contribution">This will remove <span class="@(_eventToDelete.TimeContribution.TotalHours >= 0 ? "positive" : "negative")">@FormatContribution(_eventToDelete.TimeContribution)</span> from your balance.</p>
+            <h3>@Localizer["DeleteEntryTitle"]</h3>
+            <p>@Localizer["DeleteEntryConfirm", _eventToDelete.MeterName]</p>
+            <p class="modal-contribution">@Localizer["DeleteEntryWarning", FormatContribution(_eventToDelete.TimeContribution)]</p>
             <div class="modal-actions">
-                <button class="btn-cancel" @onclick="CancelDelete">Cancel</button>
-                <button class="btn-delete" @onclick="DeleteEvent">Delete</button>
+                <button class="btn-cancel" @onclick="CancelDelete">@Localizer["Cancel"]</button>
+                <button class="btn-delete" @onclick="DeleteEvent">@Localizer["Delete"]</button>
             </div>
         </div>
     </div>
@@ -120,19 +122,15 @@
         
         if (local.Date == now.Date)
         {
-            return $"Today at {local:HH:mm}";
+            return Localizer["TodayAt", local.ToString("HH:mm")];
         }
         else if (local.Date == now.Date.AddDays(-1))
         {
-            return $"Yesterday at {local:HH:mm}";
-        }
-        else if (local.Year == now.Year)
-        {
-            return local.ToString("MMM d 'at' HH:mm");
+            return Localizer["YesterdayAt", local.ToString("HH:mm")];
         }
         else
         {
-            return local.ToString("MMM d, yyyy 'at' HH:mm");
+            return Localizer["DateTimeAt", local.ToString("MMM d"), local.ToString("HH:mm")];
         }
     }
 
@@ -140,15 +138,15 @@
     {
         if (duration.TotalHours >= 1)
         {
-            return $"{(int)duration.TotalHours}h {duration.Minutes}m";
+            return Localizer["DurationLong", (int)duration.TotalHours, duration.Minutes];
         }
         else if (duration.TotalMinutes >= 1)
         {
-            return $"{(int)duration.TotalMinutes}m {duration.Seconds}s";
+            return Localizer["DurationShort", (int)duration.TotalMinutes, duration.Seconds];
         }
         else
         {
-            return $"{(int)duration.TotalSeconds}s";
+            return Localizer["DurationSeconds", (int)duration.TotalSeconds];
         }
     }
 
