@@ -8,7 +8,7 @@ Available at https://albertogregorio.com/budgetr/
 
 ## Overview
 
-Budgetr is a cross-platform time-tracking application built with Blazor and .NET MAUI. It helps you track how you spend your time using customizable "meters" with different factors, giving you a balance sheet of your time budget.
+Budgetr is a time-tracking application built with Blazor WebAssembly. It helps you track how you spend your time using customizable "meters" with different factors, giving you a balance sheet of your time budget.
 
 ## Features
 
@@ -48,8 +48,7 @@ Budgetr is a cross-platform time-tracking application built with Blazor and .NET
 
 - **.NET 9.0**
 - **Blazor WebAssembly** - Web application
-- **.NET MAUI** - Native mobile/desktop applications (Android, iOS, macOS, Windows)
-- **Shared Razor Components** - Shared UI library between Web and MAUI
+- **Shared Razor Components** - Reusable UI library
 
 ## Project Structure
 
@@ -63,12 +62,9 @@ budgetr/
 │   │   ├── Pages/            # Application pages (Overview, Meters, Timeline, etc.)
 │   │   ├── Resources/        # Localization files
 │   │   └── Services/         # Core business logic services
-│   ├── Budgetr.Web/          # Blazor WebAssembly project
-│   │   ├── Services/         # Web-specific service implementations
-│   │   └── wwwroot/          # Static assets, CSS, JS
-│   └── Budgetr.Maui/         # .NET MAUI project
-│       ├── Platforms/        # Platform-specific code
-│       └── Resources/        # MAUI resources (icons, fonts)
+│   └── Budgetr.Web/          # Blazor WebAssembly project
+│       ├── Services/         # Web-specific service implementations
+│       └── wwwroot/          # Static assets, CSS, JS
 ├── tests/                    # Test projects
 └── Budgetr.sln               # Solution file
 ```
@@ -78,11 +74,6 @@ budgetr/
 ### Prerequisites
 
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- For MAUI development:
-  - Windows: Visual Studio 2022 with MAUI workload
-  - macOS: Visual Studio for Mac or VS Code with C# Dev Kit
-  - Android SDK (for Android builds)
-  - Xcode (for iOS/macOS builds)
 
 ### Running the Web Application
 
@@ -96,35 +87,12 @@ dotnet run
 
 The application will be available at `https://localhost:5001` or `http://localhost:5000`.
 
-### Running the MAUI Application
-
-```bash
-# Navigate to the MAUI project
-cd src/Budgetr.Maui
-
-# Run on Windows
-dotnet build -t:Run -f net9.0-windows10.0.19041.0
-
-# Run on Android
-dotnet build -t:Run -f net9.0-android
-
-# Run on iOS (macOS only)
-dotnet build -t:Run -f net9.0-ios
-
-# Run on macOS (macOS only)
-dotnet build -t:Run -f net9.0-maccatalyst
-```
-
 ### Building for Production
 
 ```bash
 # Build the Web application
 cd src/Budgetr.Web
 dotnet publish -c Release
-
-# Build the MAUI application
-cd src/Budgetr.Maui
-dotnet publish -c Release -f net9.0-android
 ```
 
 ## Google Drive Sync Setup
@@ -139,8 +107,7 @@ To enable Google Drive synchronization:
 
 ## Data Storage
 
-- **Web**: Data is stored in browser's localStorage
-- **MAUI**: Data is stored using platform-specific secure storage
+Data is stored in the browser's localStorage, which persists across sessions.
 
 ## Author
 
