@@ -10,6 +10,7 @@ public class TimeTrackingService : ITimeTrackingService
 {
     private readonly IStorageService _storage;
     private readonly IMeterConfigurationService _meterConfig;
+    private readonly ISettingsService _settingsService;
     private TimeAccount _account = new TimeAccount();
     private const string StorageKey = "budgetr_account";
     
@@ -31,10 +32,11 @@ public class TimeTrackingService : ITimeTrackingService
     
     public event Action? OnStateChanged;
 
-    public TimeTrackingService(IStorageService storage, IMeterConfigurationService meterConfig)
+    public TimeTrackingService(IStorageService storage, IMeterConfigurationService meterConfig, ISettingsService settingsService)
     {
         _storage = storage;
         _meterConfig = meterConfig;
+        _settingsService = settingsService;
     }
 
     public TimeSpan GetCurrentBalance()
@@ -233,6 +235,8 @@ public class TimeTrackingService : ITimeTrackingService
         var exportData = new BudgetrExportData
         {
             ExportedAt = DateTimeOffset.UtcNow,
+            Language = _settingsService.Language,
+            TutorialCompleted = _settingsService.TutorialCompleted,
             Meters = _account.Meters,
             Events = _account.Events
         };
@@ -256,6 +260,12 @@ public class TimeTrackingService : ITimeTrackingService
         {
             throw new InvalidOperationException("Import data must contain at least one meter.");
         }
+
+        // Apply language setting (defaults to "en" if not present in import data)
+        _settingsService.Language = string.IsNullOrEmpty(importData.Language) ? "en" : importData.Language;
+        
+        // Apply tutorial completion setting
+        _settingsService.TutorialCompleted = importData.TutorialCompleted;
 
         // Assign display order based on definition order
         for (int i = 0; i < importData.Meters.Count; i++)
@@ -351,6 +361,8 @@ public class TimeTrackingService : ITimeTrackingService
 public class BudgetrExportData
 {
     public DateTimeOffset ExportedAt { get; set; }
+    public string Language { get; set; } = "en";
+    public bool TutorialCompleted { get; set; }
     public List<Meter> Meters { get; set; } = new();
     public List<MeterEvent> Events { get; set; } = new();
 }

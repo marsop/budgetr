@@ -1,21 +1,22 @@
 @page "/"
 @using Budgetr.Shared.Services
 @inject ITimeTrackingService TimeService
+@inject IStringLocalizer<Strings> Localizer
 @implements IDisposable
 
 <div class="overview-page">
     <div class="balance-container">
-        <div class="balance-label">Current Balance</div>
+        <div class="balance-label">@Localizer["CurrentBalance"]</div>
         <div class="balance-value @BalanceClass">
             @FormatBalance(CurrentBalance)
         </div>
-        <div class="balance-unit">hours</div>
+        <div class="balance-unit">@Localizer["HoursUnit"]</div>
         
         @if (ActiveMeterName != null)
         {
             <div class="active-meter-indicator">
                 <span class="pulse"></span>
-                <span>@ActiveMeterName active</span>
+                <span>@Localizer["MeterActive", ActiveMeterName]</span>
             </div>
         }
     </div>

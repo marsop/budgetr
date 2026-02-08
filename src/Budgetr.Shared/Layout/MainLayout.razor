@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @using Budgetr.Shared.Services
 @inject IPwaService PwaService
+@inject IStringLocalizer<Strings> Localizer
 @implements IDisposable
 
 <div class="app-container">
@@ -9,7 +10,7 @@
         {
             <div class="offline-banner">
                 <span class="offline-icon">📡</span>
-                <span>You are working offline</span>
+                <span>@Localizer["OfflineBanner"]</span>
             </div>
         }
         
@@ -19,11 +20,11 @@
                 <div class="install-content">
                     <span class="install-icon">📱</span>
                     <div class="install-text">
-                        <span class="install-title">Install Budgetr</span>
-                        <span class="install-desc">Add to home screen for quick access</span>
+                        <span class="install-title">@Localizer["InstallBudgetr"]</span>
+                        <span class="install-desc">@Localizer["InstallDesc"]</span>
                     </div>
                 </div>
-                <button class="install-btn" @onclick="InstallApp">Install</button>
+                <button class="install-btn" @onclick="InstallApp">@Localizer["Install"]</button>
             </div>
         }
 
@@ -35,23 +36,27 @@
     <nav class="bottom-nav">
         <NavLink href="" class="nav-item" Match="NavLinkMatch.All">
             <span class="nav-icon">🏠</span>
-            <span class="nav-label">Overview</span>
+            <span class="nav-label">@Localizer["NavOverview"]</span>
         </NavLink>
         <NavLink href="meters" class="nav-item">
             <span class="nav-icon">⏱️</span>
-            <span class="nav-label">Meters</span>
+            <span class="nav-label">@Localizer["NavMeters"]</span>
         </NavLink>
         <NavLink href="timeline" class="nav-item">
             <span class="nav-icon">📅</span>
-            <span class="nav-label">Timeline</span>
+            <span class="nav-label">@Localizer["NavTimeline"]</span>
         </NavLink>
         <NavLink href="history" class="nav-item">
             <span class="nav-icon">📜</span>
-            <span class="nav-label">History</span>
+            <span class="nav-label">@Localizer["NavHistory"]</span>
         </NavLink>
         <NavLink href="sync" class="nav-item">
             <span class="nav-icon">☁️</span>
-            <span class="nav-label">Sync</span>
+            <span class="nav-label">@Localizer["NavSync"]</span>
+        </NavLink>
+        <NavLink href="settings" class="nav-item">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">@Localizer["NavSettings"]</span>
         </NavLink>
     </nav>
 </div>

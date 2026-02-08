@@ -61,5 +61,6 @@ public class PwaService : IPwaService, IAsyncDisposable
         {
             _objRef.Dispose();
         }
+        await Task.CompletedTask;
     }
 }

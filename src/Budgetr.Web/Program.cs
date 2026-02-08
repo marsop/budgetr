@@ -8,11 +8,15 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+builder.Services.AddLocalization();
+
+
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 // Register services
 builder.Services.AddScoped<IStorageService, BrowserStorageService>();
 builder.Services.AddScoped<IMeterConfigurationService, MeterConfigurationService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<ITimeTrackingService, TimeTrackingService>();
 builder.Services.AddScoped<GoogleDriveService>();
 builder.Services.AddScoped<IAutoSyncService, AutoSyncService>();
@@ -22,6 +26,9 @@ builder.Services.AddScoped<ITutorialService, TutorialService>();
 var host = builder.Build();
 
 // Load saved data on startup
+var settingsService = host.Services.GetRequiredService<ISettingsService>();
+await settingsService.LoadAsync();
+
 var timeService = host.Services.GetRequiredService<ITimeTrackingService>();
 await timeService.LoadAsync();
 

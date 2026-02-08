@@ -1,4 +1,5 @@
-@namespace Budgetr.Shared.Components
+@using Budgetr.Shared.Resources
+@inject IStringLocalizer<Strings> Localizer
 
 @if (IsVisible)
 {
@@ -8,8 +9,8 @@
             <p class="modal-message">@Message</p>
             
             <div class="modal-actions">
-                <button class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
-                <button class="btn btn-danger" @onclick="OnConfirm">Confirm</button>
+                <button class="btn btn-secondary" @onclick="OnCancel">@Localizer["Cancel"]</button>
+                <button class="btn btn-danger" @onclick="OnConfirm">@Localizer["Confirm"]</button>
             </div>
         </div>
     </div>
