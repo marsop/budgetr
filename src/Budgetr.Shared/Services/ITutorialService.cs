@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Budgetr.Shared.Models;
 
 namespace Budgetr.Shared.Services;
 
@@ -10,6 +12,11 @@ public interface ITutorialService
     bool IsActive { get; }
     TutorialStep? CurrentStep { get; }
     
+    bool HasCompletedTutorial { get; }
+
+    IReadOnlyList<AvatarProfile> AvailableAvatars { get; }
+    AvatarProfile CurrentAvatar { get; }
+
     event Action? OnChange;
 
     Task InitializeAsync();
@@ -17,4 +24,5 @@ public interface ITutorialService
     void NextStep();
     Task CompleteTutorialAsync();
     Task ResetTutorialAsync();
+    Task SetAvatarAsync(string avatarId);
 }

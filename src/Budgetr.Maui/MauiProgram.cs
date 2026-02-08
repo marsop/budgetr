@@ -17,7 +17,21 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddMauiBlazorWebView();
+
+        // Platform specific services
         builder.Services.AddSingleton<IPwaService, MobilePwaService>();
+        builder.Services.AddScoped<IStorageService, MauiStorageService>();
+
+        // Shared services
+        builder.Services.AddLocalization();
+        builder.Services.AddScoped<IMeterConfigurationService, MeterConfigurationService>();
+        builder.Services.AddScoped<ISettingsService, SettingsService>();
+        builder.Services.AddScoped<ITimeTrackingService, TimeTrackingService>();
+        builder.Services.AddScoped<ITutorialService, TutorialService>();
+        
+        // Optional/Other
+        builder.Services.AddScoped<GoogleDriveService>();
+        builder.Services.AddScoped<IAutoSyncService, AutoSyncService>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

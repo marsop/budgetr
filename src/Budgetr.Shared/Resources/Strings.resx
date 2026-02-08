@@ -403,4 +403,16 @@
   <data name="ConfirmationDefaultMessage" xml:space="preserve">
     <value>Are you sure you want to proceed?</value>
   </data>
+  <data name="TutorialAvatar" xml:space="preserve">
+    <value>Tutorial Avatar</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="SupportDesc" xml:space="preserve">
+    <value>If you find Budgetr useful, you can support its development by buying me a coffee! ☕</value>
+  </data>
+  <data name="BuyMeACoffee" xml:space="preserve">
+    <value>Buy me a coffee</value>
+  </data>
 </root>

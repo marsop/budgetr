@@ -8,7 +8,8 @@ try
 
     var storage = new MockStorageService();
     var config = new MockMeterConfigService();
-    var service = new TimeTrackingService(storage, config);
+    var settings = new MockSettingsService();
+    var service = new TimeTrackingService(storage, config, settings);
     
     // Initialize (LoadAsync)
     await service.LoadAsync();
@@ -105,5 +106,20 @@ class MockMeterConfigService : IMeterConfigurationService
             new Meter { Name = "M1", Factor = 1.0 },
             new Meter { Name = "M2", Factor = -1.0 }
         });
+    }
+}
+
+class MockSettingsService : ISettingsService
+{
+    public string Language { get; set; } = "en";
+    public bool TutorialCompleted { get; set; }
+    public event Action? OnSettingsChanged;
+
+    public Task LoadAsync() => Task.CompletedTask;
+    public Task SaveAsync() => Task.CompletedTask;
+    public Task SetLanguageAsync(string language) 
+    {
+        Language = language;
+        return Task.CompletedTask;
     }
 }

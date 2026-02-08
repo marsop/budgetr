@@ -1,10 +1,12 @@
 @page "/settings"
 @using Budgetr.Shared.Services
+@using Microsoft.JSInterop
 @inject ISettingsService SettingsService
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<Strings> Localizer
 @inject ITimeTrackingService TimeService
 @inject ITutorialService TutorialService
+@inject IJSRuntime JSRuntime
 @implements IDisposable
 
 <div class="settings-page">
@@ -32,6 +34,25 @@
                 </div>
             </div>
         </div>
+
+        <div class="setting-item">
+            <span class="setting-label">@Localizer["TutorialAvatar"]</span>
+            <div class="language-dropdown">
+                <button type="button" class="dropdown-trigger" @onclick="ToggleAvatarDropdown">
+                    <span>@SelectedAvatarName</span>
+                </button>
+                <div class="dropdown-menu @(isAvatarDropdownOpen ? "show" : "")">
+                    @foreach (var avatar in TutorialService.AvailableAvatars)
+                    {
+                        <div class="dropdown-item @(TutorialService.CurrentAvatar.Id == avatar.Id ? "selected" : "")" 
+                             @onclick="() => SelectAvatar(avatar.Id)" 
+                             @onclick:stopPropagation="true">
+                            <span>@avatar.Name</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="settings-section">
@@ -40,6 +61,15 @@
             <span class="setting-label">@Localizer["Version"]</span>
             <span class="setting-value">1.0.0</span>
         </div>
+    </div>
+
+    <div class="settings-section">
+        <h2 class="section-title">@Localizer["Support"]</h2>
+        <p class="setting-description">@Localizer["SupportDesc"]</p>
+        <button class="support-btn" @onclick="OpenBuyMeACoffee">
+            <span class="btn-icon">☕</span>
+            <span>@Localizer["BuyMeACoffee"]</span>
+        </button>
     </div>
 
     <Budgetr.Shared.Components.ConfirmationDialog 
@@ -112,11 +142,24 @@
     protected override void OnInitialized()
     {
         SettingsService.OnSettingsChanged += StateHasChanged;
+        TutorialService.OnChange += StateHasChanged;
     }
 
     public void Dispose()
     {
         SettingsService.OnSettingsChanged -= StateHasChanged;
+        TutorialService.OnChange -= StateHasChanged;
+    }
+    
+    // Avatar Logic
+    private bool isAvatarDropdownOpen = false;
+    private void ToggleAvatarDropdown() => isAvatarDropdownOpen = !isAvatarDropdownOpen;
+    private string SelectedAvatarName => TutorialService.CurrentAvatar?.Name ?? "Unknown";
+
+    private async Task SelectAvatar(string avatarId)
+    {
+        await TutorialService.SetAvatarAsync(avatarId);
+        isAvatarDropdownOpen = false;
     }
 
     // Reset Logic
@@ -166,5 +209,10 @@
         {
             // Error handling can be added here if needed
         }
+    }
+
+    private async Task OpenBuyMeACoffee()
+    {
+        await JSRuntime.InvokeVoidAsync("open", "https://www.buymeacoffee.com/albertogregorio", "_blank");
     }
 }

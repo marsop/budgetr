@@ -236,6 +236,7 @@ public class TimeTrackingService : ITimeTrackingService
         {
             ExportedAt = DateTimeOffset.UtcNow,
             Language = _settingsService.Language,
+            TutorialCompleted = _settingsService.TutorialCompleted,
             Meters = _account.Meters,
             Events = _account.Events
         };
@@ -262,6 +263,9 @@ public class TimeTrackingService : ITimeTrackingService
 
         // Apply language setting (defaults to "en" if not present in import data)
         _settingsService.Language = string.IsNullOrEmpty(importData.Language) ? "en" : importData.Language;
+        
+        // Apply tutorial completion setting
+        _settingsService.TutorialCompleted = importData.TutorialCompleted;
 
         // Assign display order based on definition order
         for (int i = 0; i < importData.Meters.Count; i++)
@@ -358,6 +362,7 @@ public class BudgetrExportData
 {
     public DateTimeOffset ExportedAt { get; set; }
     public string Language { get; set; } = "en";
+    public bool TutorialCompleted { get; set; }
     public List<Meter> Meters { get; set; } = new();
     public List<MeterEvent> Events { get; set; } = new();
 }

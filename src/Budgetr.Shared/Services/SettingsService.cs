@@ -12,7 +12,22 @@ public class SettingsService : ISettingsService
     private const string StorageKey = "budgetr_settings";
     private const string DefaultLanguage = "en";
 
+    private bool _tutorialCompleted;
     private string _language = DefaultLanguage;
+
+    public bool TutorialCompleted
+    {
+        get => _tutorialCompleted;
+        set
+        {
+            if (_tutorialCompleted != value)
+            {
+                _tutorialCompleted = value;
+                OnSettingsChanged?.Invoke();
+                _ = SaveAsync();
+            }
+        }
+    }
 
     public async Task SetLanguageAsync(string language)
     {
@@ -55,12 +70,14 @@ public class SettingsService : ISettingsService
                 if (data != null)
                 {
                     _language = string.IsNullOrEmpty(data.Language) ? DefaultLanguage : data.Language;
+                    _tutorialCompleted = data.TutorialCompleted;
                 }
             }
             catch
             {
                 // If deserialization fails, keep defaults
                 _language = DefaultLanguage;
+                _tutorialCompleted = false;
             }
         }
         
@@ -92,7 +109,11 @@ public class SettingsService : ISettingsService
 
     public async Task SaveAsync()
     {
-        var data = new SettingsData { Language = _language };
+        var data = new SettingsData 
+        { 
+            Language = _language,
+            TutorialCompleted = _tutorialCompleted
+        };
         var json = JsonSerializer.Serialize(data);
         await _storage.SetItemAsync(StorageKey, json);
     }
@@ -104,4 +125,5 @@ public class SettingsService : ISettingsService
 internal class SettingsData
 {
     public string Language { get; set; } = "en";
+    public bool TutorialCompleted { get; set; }
 }

@@ -11,6 +11,11 @@ public interface ISettingsService
     string Language { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the tutorial has been completed.
+    /// </summary>
+    bool TutorialCompleted { get; set; }
+
+    /// <summary>
     /// Event raised when any setting changes.
     /// </summary>
     event Action? OnSettingsChanged;
