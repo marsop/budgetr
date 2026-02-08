@@ -6,7 +6,7 @@ namespace Budgetr.Shared.Services;
 public interface ISettingsService
 {
     /// <summary>
-    /// Gets or sets the current language code (e.g., "en", "de", "es", "gl", "vo").
+    /// Gets or sets the current language code (e.g., "en", "de", "es", "gl", "gsw").
     /// </summary>
     string Language { get; set; }
 
