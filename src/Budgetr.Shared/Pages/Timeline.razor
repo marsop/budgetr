@@ -1,6 +1,7 @@
 @page "/timeline"
 @using Budgetr.Shared.Services
 @using Budgetr.Shared.Resources
+@using System.Globalization
 @inject ITimeTrackingService TimeService
 @inject IStringLocalizer<Strings> Localizer
 @implements IDisposable
@@ -104,10 +105,10 @@
         {
             if (DataPoints.Count < 2) return "";
             var sb = new System.Text.StringBuilder();
-            sb.Append($"M {GetXFromTimestamp(DataPoints[0].Timestamp)} {GetY(DataPoints[0].BalanceHours)}");
+            sb.Append(FormattableString.Invariant($"M {GetXFromTimestamp(DataPoints[0].Timestamp)} {GetY(DataPoints[0].BalanceHours)}"));
             for (int i = 1; i < DataPoints.Count; i++)
             {
-                sb.Append($" L {GetXFromTimestamp(DataPoints[i].Timestamp)} {GetY(DataPoints[i].BalanceHours)}");
+                sb.Append(FormattableString.Invariant($" L {GetXFromTimestamp(DataPoints[i].Timestamp)} {GetY(DataPoints[i].BalanceHours)}"));
             }
             return sb.ToString();
         }
@@ -121,13 +122,13 @@
             var sb = new System.Text.StringBuilder();
             var firstX = GetXFromTimestamp(DataPoints[0].Timestamp);
             var lastX = GetXFromTimestamp(DataPoints[^1].Timestamp);
-            sb.Append($"M {firstX} {GetY(0)}");
-            sb.Append($" L {firstX} {GetY(DataPoints[0].BalanceHours)}");
+            sb.Append(FormattableString.Invariant($"M {firstX} {GetY(0)}"));
+            sb.Append(FormattableString.Invariant($" L {firstX} {GetY(DataPoints[0].BalanceHours)}"));
             for (int i = 1; i < DataPoints.Count; i++)
             {
-                sb.Append($" L {GetXFromTimestamp(DataPoints[i].Timestamp)} {GetY(DataPoints[i].BalanceHours)}");
+                sb.Append(FormattableString.Invariant($" L {GetXFromTimestamp(DataPoints[i].Timestamp)} {GetY(DataPoints[i].BalanceHours)}"));
             }
-            sb.Append($" L {lastX} {GetY(0)}");
+            sb.Append(FormattableString.Invariant($" L {lastX} {GetY(0)}"));
             sb.Append(" Z");
             return sb.ToString();
         }
@@ -143,13 +144,13 @@
         for (int i = 0; i <= 4; i++)
         {
             var y = 50 + i * 75;
-            sb.Append($@"<line x1=""50"" y1=""{y}"" x2=""750"" y2=""{y}"" stroke=""#333"" stroke-dasharray=""4,4"" />");
+            sb.Append(FormattableString.Invariant($@"<line x1=""50"" y1=""{y}"" x2=""750"" y2=""{y}"" stroke=""#333"" stroke-dasharray=""4,4"" />"));
         }
         // Vertical grid lines
         for (int i = 0; i <= 4; i++)
         {
             var x = 50 + i * 175;
-            sb.Append($@"<line x1=""{x}"" y1=""50"" x2=""{x}"" y2=""350"" stroke=""#333"" stroke-dasharray=""4,4"" />");
+            sb.Append(FormattableString.Invariant($@"<line x1=""{x}"" y1=""50"" x2=""{x}"" y2=""350"" stroke=""#333"" stroke-dasharray=""4,4"" />"));
         }
         sb.Append("</g>");
         
@@ -161,7 +162,7 @@
         {
             var value = MaxY - (i * range / 4);
             var y = 50 + i * 75;
-            sb.Append($@"<text x=""45"" y=""{y + 5}"" text-anchor=""end"" fill=""#888"" font-size=""12"">{value:F1}h</text>");
+            sb.Append(FormattableString.Invariant($@"<text x=""45"" y=""{y + 5}"" text-anchor=""end"" fill=""#888"" font-size=""12"">{value:F1}h</text>"));
         }
         sb.Append("</g>");
         
@@ -174,7 +175,7 @@
             var x = 50 + i * 175; // 700 / 4 = 175
             var time = chartStartTime + TimeSpan.FromTicks((long)(TimeService.TimelinePeriod.Ticks * i / 4.0));
             var timeLabel = FormatTimeLabel(time);
-            sb.Append($@"<text x=""{x}"" y=""370"" text-anchor=""middle"" fill=""#888"" font-size=""11"">{timeLabel}</text>");
+            sb.Append(FormattableString.Invariant($@"<text x=""{x}"" y=""370"" text-anchor=""middle"" fill=""#888"" font-size=""11"">{timeLabel}</text>"));
         }
         sb.Append("</g>");
         
@@ -206,10 +207,10 @@
                 var x = GetXFromTimestamp(lastPoint.Timestamp);
                 var y = GetY(lastPoint.BalanceHours);
                 var valueText = lastPoint.BalanceHours >= 0 
-                    ? $"+{lastPoint.BalanceHours:F2}h" 
-                    : $"{lastPoint.BalanceHours:F2}h";
-                sb.Append($@"<circle cx=""{x}"" cy=""{y}"" r=""6"" fill=""{GradientColor}"" class=""pulse-circle"" />");
-                sb.Append($@"<text x=""{x}"" y=""{y - 15}"" text-anchor=""middle"" fill=""{GradientColor}"" font-size=""14"" font-weight=""bold"">{valueText}</text>");
+                    ? FormattableString.Invariant($"+{lastPoint.BalanceHours:F2}h") 
+                    : FormattableString.Invariant($"{lastPoint.BalanceHours:F2}h");
+                sb.Append(FormattableString.Invariant($@"<circle cx=""{x}"" cy=""{y}"" r=""6"" fill=""{GradientColor}"" class=""pulse-circle"" />"));
+                sb.Append(FormattableString.Invariant($@"<text x=""{x}"" y=""{y - 15}"" text-anchor=""middle"" fill=""{GradientColor}"" font-size=""14"" font-weight=""bold"">{valueText}</text>"));
             }
         }
         else
