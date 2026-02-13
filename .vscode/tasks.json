@@ -11,7 +11,15 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
-            "problemMatcher": "$msCompile"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "silent",
+                "revealProblems": "onProblem"
+            }
         },
         {
             "label": "publish",
@@ -23,7 +31,10 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always"
+            }
         },
         {
             "label": "watch",
@@ -49,7 +60,51 @@
                     "beginsPattern": "^\\\\s*Building\\\\.\\.\\.",
                     "endsPattern": "^\\\\s*Application started\\\\. Press Ctrl\\\\+C to shut down\\\\."
                 }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
             }
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/tests/Budgetr.ValidationTest/Budgetr.ValidationTest.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "${workspaceFolder}/Budgetr.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "rebuild",
+            "dependsOn": [
+                "clean",
+                "build"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": "$msCompile",
+            "group": "build"
         }
     ]
 }
