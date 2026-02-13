@@ -1759,3 +1759,48 @@ body {
 .support-btn .btn-icon {
     font-size: 1.25rem;
 }
+
+/* ===== Drag and Drop ===== */
+
+.meter-container.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+    transition: all var(--transition-fast);
+}
+
+.meter-container.dragging .meter-button {
+    border-style: dashed;
+    border-color: var(--color-accent);
+}
+
+.meter-drop-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 2px dashed var(--color-accent);
+    border-radius: var(--radius-xl);
+    animation: dropPreviewPulse 1.5s ease-in-out infinite;
+    transition: all var(--transition-fast);
+}
+
+.drop-preview-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-accent);
+    opacity: 0.8;
+    text-align: center;
+    padding: var(--spacing-sm);
+}
+
+@keyframes dropPreviewPulse {
+    0%, 100% {
+        background: rgba(99, 102, 241, 0.06);
+        border-color: rgba(99, 102, 241, 0.5);
+    }
+    50% {
+        background: rgba(99, 102, 241, 0.12);
+        border-color: var(--color-accent);
+    }
+}
