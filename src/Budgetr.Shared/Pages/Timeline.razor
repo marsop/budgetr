@@ -32,7 +32,8 @@
         new PeriodOption("1h", TimeSpan.FromHours(1)),
         new PeriodOption("12h", TimeSpan.FromHours(12)),
         new PeriodOption("24h", TimeSpan.FromHours(24)),
-        new PeriodOption("1w", TimeSpan.FromDays(7))
+        new PeriodOption("1w", TimeSpan.FromDays(7)),
+        new PeriodOption("1m", TimeSpan.FromDays(30))
     };
     
     private List<TimelineDataPoint> DataPoints { get; set; } = new();

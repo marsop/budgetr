@@ -99,6 +99,12 @@ public interface ITimeTrackingService
     /// Resets all data to initial state (default meters, no history).
     /// </summary>
     Task ResetDataAsync();
+
+    /// <summary>
+    /// Reorders the meters based on the provided list of meter IDs.
+    /// </summary>
+    /// <param name="orderedMeterIds">The list of meter IDs in the desired order.</param>
+    void ReorderMeters(List<Guid> orderedMeterIds);
 }
 
 /// <summary>

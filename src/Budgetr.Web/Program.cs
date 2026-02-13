@@ -22,6 +22,8 @@ builder.Services.AddScoped<GoogleDriveService>();
 builder.Services.AddScoped<IAutoSyncService, AutoSyncService>();
 builder.Services.AddScoped<IPwaService, PwaService>();
 builder.Services.AddScoped<ITutorialService, TutorialService>();
+// Load configuration
+builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
 var host = builder.Build();
 

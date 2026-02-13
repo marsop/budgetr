@@ -15,7 +15,12 @@
             var isActive = IsActiveMeter(meter.Id);
             var isEditing = _editingMeterId == meter.Id;
             
-            <div class="meter-container">
+            <div class="meter-container"
+                 draggable="@(isEditing ? "false" : "true")"
+                 @ondragstart="() => HandleDragStart(meter)"
+                 @ondrop="() => HandleDrop(meter)"
+                 @ondragover="HandleDragOver"
+                 @ondragover:preventDefault>
                 @if (isEditing)
                 {
                     <div class="meter-edit-form">
@@ -74,6 +79,8 @@
 
         }
         
+        @if (TimeService.Account.Meters.Count < Budgetr.Shared.Services.TimeTrackingService.MaxMeters)
+        {
         <div class="meter-container add-meter">
             @if (_isAddingMeter)
             {
@@ -112,6 +119,7 @@
                 </button>
             }
         </div>
+        }
     </div>
     
     @if (ActiveEvent != null)
@@ -283,6 +291,41 @@
         {
             _addValidationError = ex.Message;
         }
+    }
+
+    // Drag and Drop Logic
+    private Meter? _draggedMeter;
+
+    private void HandleDragStart(Meter meter)
+    {
+        _draggedMeter = meter;
+    }
+
+    private void HandleDragOver(DragEventArgs e)
+    {
+        // Allowed to drop
+        e.DataTransfer.DropEffect = "move";
+    }
+
+    private void HandleDrop(Meter targetMeter)
+    {
+        if (_draggedMeter == null || _draggedMeter.Id == targetMeter.Id) return;
+
+        var meters = TimeService.Account.Meters.OrderBy(m => m.DisplayOrder).ToList();
+        var oldIndex = meters.FindIndex(m => m.Id == _draggedMeter.Id);
+        var newIndex = meters.FindIndex(m => m.Id == targetMeter.Id);
+
+        if (oldIndex != -1 && newIndex != -1)
+        {
+            meters.RemoveAt(oldIndex);
+            meters.Insert(newIndex, _draggedMeter);
+            
+            // Extract just the IDs in the new order
+            var orderedIds = meters.Select(m => m.Id).ToList();
+            TimeService.ReorderMeters(orderedIds);
+        }
+        
+        _draggedMeter = null;
     }
 
     public void Dispose()

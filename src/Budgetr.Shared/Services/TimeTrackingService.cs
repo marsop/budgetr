@@ -13,6 +13,7 @@ public class TimeTrackingService : ITimeTrackingService
     private readonly ISettingsService _settingsService;
     private TimeAccount _account = new TimeAccount();
     private const string StorageKey = "budgetr_account";
+    public const int MaxMeters = 8;
     
     public TimeAccount Account => _account;
 
@@ -174,6 +175,15 @@ public class TimeTrackingService : ITimeTrackingService
             {
                 _account.Events = loaded.Events;
                 _account.Meters = loaded.Meters;
+
+                // Enforce maximum meter limit
+                if (_account.Meters.Count > MaxMeters)
+                {
+                    _account.Meters = _account.Meters
+                        .OrderBy(m => m.DisplayOrder)
+                        .Take(MaxMeters)
+                        .ToList();
+                }
                 
                 // Ensure TimelinePeriod is valid (handle migration from versions without it)
                 if (loaded.TimelinePeriod != TimeSpan.Zero)
@@ -273,6 +283,12 @@ public class TimeTrackingService : ITimeTrackingService
             importData.Meters[i].DisplayOrder = i;
         }
 
+        // Enforce maximum meter limit
+        if (importData.Meters.Count > MaxMeters)
+        {
+            importData.Meters = importData.Meters.Take(MaxMeters).ToList();
+        }
+
         // Replace current data
         _account.Meters = importData.Meters;
         _account.Events = importData.Events ?? new List<MeterEvent>();
@@ -320,6 +336,11 @@ public class TimeTrackingService : ITimeTrackingService
 
     public void AddMeter(string name, double factor)
     {
+        if (_account.Meters.Count >= MaxMeters)
+        {
+            throw new InvalidOperationException($"Cannot add more than {MaxMeters} meters.");
+        }
+
         if (string.IsNullOrWhiteSpace(name) || name.Length < 1 || name.Length > 40)
         {
             throw new ArgumentException("Meter name must be between 1 and 40 characters.");
@@ -352,6 +373,35 @@ public class TimeTrackingService : ITimeTrackingService
         
         OnStateChanged?.Invoke();
         await SaveAsync();
+    }
+
+    public void ReorderMeters(List<Guid> orderedMeterIds)
+    {
+        if (orderedMeterIds == null || orderedMeterIds.Count != _account.Meters.Count)
+        {
+            return;
+        }
+
+        var newMetersList = new List<Meter>();
+        int order = 0;
+
+        foreach (var id in orderedMeterIds)
+        {
+            var meter = _account.Meters.FirstOrDefault(m => m.Id == id);
+            if (meter != null)
+            {
+                meter.DisplayOrder = order++;
+                newMetersList.Add(meter);
+            }
+        }
+
+        // Only apply if we found all meters (integrity check)
+        if (newMetersList.Count == _account.Meters.Count)
+        {
+            _account.Meters = newMetersList;
+            OnStateChanged?.Invoke();
+            _ = SaveAsync();
+        }
     }
 }
 

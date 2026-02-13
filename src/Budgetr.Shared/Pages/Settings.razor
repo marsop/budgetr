@@ -2,12 +2,14 @@
 @page "/sync"
 @using Budgetr.Shared.Services
 @using Microsoft.JSInterop
+@using Microsoft.Extensions.Configuration
 @inject ISettingsService SettingsService
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<Strings> Localizer
 @inject ITimeTrackingService TimeService
 @inject ITutorialService TutorialService
 @inject IJSRuntime JSRuntime
+@inject IConfiguration Configuration
 @inject IAutoSyncService AutoSyncService
 @implements IDisposable
 
@@ -123,18 +125,28 @@
                 @if (!isGoogleDriveConfigured)
                 {
                     <div class="config-section">
-                        <p class="config-note">
-                            @Localizer["GDriveConfigNote"]
-                        </p>
-                        <div class="config-input-group">
-                            <label for="clientIdInput">@Localizer["OAuthClientId"]</label>
-                            <input type="text" 
-                                   id="clientIdInput" 
-                                   @bind="clientIdInput" 
-                                   placeholder="@Localizer["EnterClientId"]"
-                                   class="config-input" />
-                        </div>
-                        <button class="sync-button config-btn" @onclick="ConfigureGoogleDrive" disabled="@string.IsNullOrWhiteSpace(clientIdInput)">
+                        @if (IsConfiguredViaFile)
+                        {
+                            <div class="config-message success">
+                                <span class="icon">🔒</span>
+                                <span>@Localizer["ClientIdConfiguredViaFile"]</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="config-note">
+                                @Localizer["GDriveConfigNote"]
+                            </p>
+                            <div class="config-input-group">
+                                <label for="clientIdInput">@Localizer["OAuthClientId"]</label>
+                                <input type="text" 
+                                       id="clientIdInput" 
+                                       @bind="clientIdInput" 
+                                       placeholder="@Localizer["EnterClientId"]"
+                                       class="config-input" />
+                            </div>
+                        }
+                        <button class="sync-button config-btn" @onclick="ConfigureGoogleDrive" disabled="@(!IsConfiguredViaFile && string.IsNullOrWhiteSpace(clientIdInput))">
                             <span class="btn-icon">⚙️</span>
                             <span>@Localizer["Configure"]</span>
                         </button>
@@ -302,6 +314,8 @@
     private AutoSyncStatus autoSyncStatus = AutoSyncStatus.Idle;
     private DateTimeOffset? lastAutoSyncTime;
 
+    private bool IsConfiguredViaFile => !string.IsNullOrEmpty(Configuration["GoogleDrive:ClientId"]) && Configuration["GoogleDrive:ClientId"] != "YOUR_CLIENT_ID_HERE";
+
     // ===== Reset State =====
     private bool showConfirmation1;
     private bool showConfirmation2;
@@ -453,11 +467,24 @@
     {
         try
         {
-            var savedClientId = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "budgetr_gdrive_clientid");
-            if (!string.IsNullOrEmpty(savedClientId))
+            if (IsConfiguredViaFile)
             {
-                await JSRuntime.InvokeVoidAsync("googleDriveInterop.initialize", savedClientId);
+                clientIdInput = Configuration["GoogleDrive:ClientId"];
+                await JSRuntime.InvokeVoidAsync("googleDriveInterop.initialize", clientIdInput);
                 isGoogleDriveConfigured = true;
+            }
+            else
+            {
+                var savedClientId = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "budgetr_gdrive_clientid");
+                if (!string.IsNullOrEmpty(savedClientId))
+                {
+                    await JSRuntime.InvokeVoidAsync("googleDriveInterop.initialize", savedClientId);
+                    isGoogleDriveConfigured = true;
+                }
+            }
+
+            if (isGoogleDriveConfigured)
+            {
                 isGoogleDriveSignedIn = await JSRuntime.InvokeAsync<bool>("googleDriveInterop.isSignedIn");
                 
                 if (isGoogleDriveSignedIn)
@@ -489,14 +516,18 @@
 
     private async Task ConfigureGoogleDrive()
     {
-        if (string.IsNullOrWhiteSpace(clientIdInput))
+        if (!IsConfiguredViaFile && string.IsNullOrWhiteSpace(clientIdInput))
             return;
             
         statusMessage = null;
         
         try
         {
-            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "budgetr_gdrive_clientid", clientIdInput);
+            if (!IsConfiguredViaFile)
+            {
+                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "budgetr_gdrive_clientid", clientIdInput);
+            }
+            
             await JSRuntime.InvokeVoidAsync("googleDriveInterop.initialize", clientIdInput);
             isGoogleDriveConfigured = true;
             statusMessage = Localizer["SuccessGDriveConfig"];

@@ -415,4 +415,7 @@
   <data name="BuyMeACoffee" xml:space="preserve">
     <value>Buy me a coffee</value>
   </data>
+  <data name="ClientIdConfiguredViaFile" xml:space="preserve">
+    <value>Client ID is configured via file.</value>
+  </data>
 </root>

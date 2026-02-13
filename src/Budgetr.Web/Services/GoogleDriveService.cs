@@ -1,4 +1,5 @@
 using Budgetr.Shared.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.JSInterop;
 
 namespace Budgetr.Web.Services;
@@ -10,14 +11,16 @@ public class GoogleDriveService : IGoogleDriveService
 {
     private readonly IJSRuntime _js;
     private readonly IStorageService _storage;
+    private readonly IConfiguration _configuration;
     private const string ClientIdStorageKey = "budgetr_gdrive_clientid";
     private string? _clientId;
     private bool _isInitialized;
 
-    public GoogleDriveService(IJSRuntime js, IStorageService storage)
+    public GoogleDriveService(IJSRuntime js, IStorageService storage, IConfiguration configuration)
     {
         _js = js;
         _storage = storage;
+        _configuration = configuration;
     }
 
     public async Task InitializeAsync(string clientId)
@@ -45,6 +48,21 @@ public class GoogleDriveService : IGoogleDriveService
         if (_isInitialized)
             return true;
             
+        // First priority: Configuration
+        var configClientId = _configuration["GoogleDrive:ClientId"];
+        if (!string.IsNullOrEmpty(configClientId) && configClientId != "YOUR_CLIENT_ID_HERE")
+        {
+            try 
+            {
+                await InitializeAsync(configClientId);
+                return true;
+            }
+            catch
+            {
+                // Fallback to storage if config fails (unlikely)
+            }
+        }
+    
         var savedClientId = await _storage.GetItemAsync(ClientIdStorageKey);
         if (!string.IsNullOrEmpty(savedClientId))
         {
