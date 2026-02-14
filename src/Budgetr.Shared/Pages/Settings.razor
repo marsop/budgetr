@@ -74,6 +74,10 @@
                 <span class="tab-icon">☁️</span>
                 <span>@Localizer["TabGDrive"]</span>
             </button>
+            <button class="tab-button @(activeTab == "supabase" ? "active" : "")" @onclick="@(() => SwitchToSupabase())">
+                <span class="tab-icon">🗄️</span>
+                <span>@Localizer["TabSupabase"]</span>
+            </button>
         </div>
         
         @if (activeTab == "local")
@@ -230,6 +234,152 @@
                 }
             </div>
         }
+        else if (activeTab == "supabase")
+        {
+            <div class="sync-section">
+                <h3>🗄️ @Localizer["SupabaseSync"]</h3>
+                <p class="section-description">@Localizer["SupabaseDesc"]</p>
+                
+                @if (!isSupabaseConfigured)
+                {
+                    <div class="config-section">
+                        @if (IsSupabaseConfiguredViaFile)
+                        {
+                            <div class="config-message success">
+                                <span class="icon">🔒</span>
+                                <span>@Localizer["SupabaseConfiguredViaFile"]</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="config-note">
+                                @Localizer["SupabaseConfigNote"]
+                            </p>
+                            <div class="config-input-group">
+                                <label for="supabaseUrlInput">@Localizer["SupabaseUrl"]</label>
+                                <input type="text" 
+                                       id="supabaseUrlInput" 
+                                       @bind="supabaseUrlInput" 
+                                       placeholder="@Localizer["EnterSupabaseUrl"]"
+                                       class="config-input" />
+                            </div>
+                            <div class="config-input-group">
+                                <label for="supabaseAnonKeyInput">@Localizer["SupabaseAnonKey"]</label>
+                                <input type="text" 
+                                       id="supabaseAnonKeyInput" 
+                                       @bind="supabaseAnonKeyInput" 
+                                       placeholder="@Localizer["EnterAnonKey"]"
+                                       class="config-input" />
+                            </div>
+                        }
+                        <button class="sync-button config-btn" @onclick="ConfigureSupabase" disabled="@(!IsSupabaseConfiguredViaFile && (string.IsNullOrWhiteSpace(supabaseUrlInput) || string.IsNullOrWhiteSpace(supabaseAnonKeyInput)))">
+                            <span class="btn-icon">⚙️</span>
+                            <span>@Localizer["Configure"]</span>
+                        </button>
+                    </div>
+                }
+                else if (!isSupabaseSignedIn)
+                {
+                    <div class="config-section">
+                        <div class="config-input-group">
+                            <label for="supabaseEmailInput">@Localizer["SignInEmail"]</label>
+                            <input type="email" 
+                                   id="supabaseEmailInput" 
+                                   @bind="supabaseEmailInput" 
+                                   placeholder="email@example.com"
+                                   class="config-input" />
+                        </div>
+                        <div class="config-input-group">
+                            <label for="supabasePasswordInput">@Localizer["SignInPassword"]</label>
+                            <input type="password" 
+                                   id="supabasePasswordInput" 
+                                   @bind="supabasePasswordInput" 
+                                   placeholder="••••••••"
+                                   class="config-input" />
+                        </div>
+                        <div class="gdrive-actions">
+                            <button class="sync-button google-btn" @onclick="SignInWithSupabase" disabled="@(isSupabaseSigningIn || string.IsNullOrWhiteSpace(supabaseEmailInput) || string.IsNullOrWhiteSpace(supabasePasswordInput))">
+                                <span class="btn-icon">🔑</span>
+                                <span>@(isSupabaseSigningIn ? Localizer["SigningIn"] : Localizer["SignIn"])</span>
+                            </button>
+                            <button class="sync-button export-btn" @onclick="SignUpWithSupabase" disabled="@(isSupabaseSigningUp || string.IsNullOrWhiteSpace(supabaseEmailInput) || string.IsNullOrWhiteSpace(supabasePasswordInput))">
+                                <span class="btn-icon">📝</span>
+                                <span>@(isSupabaseSigningUp ? Localizer["SigningUp"] : Localizer["SignUp"])</span>
+                            </button>
+                        </div>
+                        
+                        <div class="reconfigure-section">
+                            <button class="link-button" @onclick="ShowSupabaseReconfigure">@Localizer["ReconfigureSupabase"]</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="signed-in-info">
+                        <span class="check-icon">✅</span>
+                        <span>@Localizer["SignedInAs", supabaseUserEmail ?? ""]</span>
+                    </div>
+                    
+                    @if (supabaseLastBackupTime.HasValue)
+                    {
+                        <div class="backup-info">
+                            <span class="info-icon">ℹ️</span>
+                            <span>@Localizer["LastBackup", supabaseLastBackupTime.Value.ToLocalTime().ToString("g")]</span>
+                        </div>
+                    }
+                    
+                    <div class="gdrive-actions">
+                        <button class="sync-button backup-btn" @onclick="BackupToSupabase" disabled="@isSupabaseBackingUp">
+                            <span class="btn-icon">⬆️</span>
+                            <span>@(isSupabaseBackingUp ? Localizer["BackingUp"] : Localizer["BackupToSupabase"])</span>
+                        </button>
+                        
+                        <button class="sync-button restore-btn" @onclick="RestoreFromSupabase" disabled="@isSupabaseRestoring">
+                            <span class="btn-icon">⬇️</span>
+                            <span>@(isSupabaseRestoring ? Localizer["Restoring"] : Localizer["RestoreFromSupabase"])</span>
+                        </button>
+                    </div>
+                    
+                    <div class="auto-sync-section">
+                        <div class="auto-sync-header">
+                            <span class="auto-sync-label">🔄 @Localizer["AutoSync"]</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked="@isSupabaseAutoSyncEnabled" @onchange="OnSupabaseAutoSyncToggled" disabled="@isTogglingAutoSync" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        @if (isSupabaseAutoSyncEnabled)
+                        {
+                            <div class="auto-sync-status @GetAutoSyncStatusClass()">
+                                @switch (autoSyncStatus)
+                                {
+                                    case AutoSyncStatus.Syncing:
+                                        <span class="status-icon spinning">🔄</span>
+                                        <span>@Localizer["Syncing"]</span>
+                                        break;
+                                    case AutoSyncStatus.Success:
+                                        <span class="status-icon">✅</span>
+                                        <span>@Localizer["LastAutoSync", lastAutoSyncTime?.ToLocalTime().ToString("g") ?? "Never"]</span>
+                                        break;
+                                    case AutoSyncStatus.Failed:
+                                        <span class="status-icon">❌</span>
+                                        <span>@Localizer["SyncFailedRetry"]</span>
+                                        break;
+                                    default:
+                                        <span class="status-icon">⏳</span>
+                                        <span>@Localizer["WatchingChanges"]</span>
+                                        break;
+                                }
+                            </div>
+                        }
+                    </div>
+                    
+                    <div class="signout-section">
+                        <button class="link-button signout" @onclick="SignOutFromSupabase">@Localizer["SignOut"]</button>
+                    </div>
+                }
+            </div>
+        }
         
         @if (!string.IsNullOrEmpty(statusMessage))
         {
@@ -310,11 +460,29 @@
     
     // Auto-sync state
     private bool isAutoSyncEnabled;
+    private bool isSupabaseAutoSyncEnabled;
     private bool isTogglingAutoSync;
     private AutoSyncStatus autoSyncStatus = AutoSyncStatus.Idle;
     private DateTimeOffset? lastAutoSyncTime;
 
     private bool IsConfiguredViaFile => !string.IsNullOrEmpty(Configuration["GoogleDrive:ClientId"]) && Configuration["GoogleDrive:ClientId"] != "YOUR_CLIENT_ID_HERE";
+
+    // Supabase state
+    private bool isSupabaseConfigured;
+    private bool isSupabaseSignedIn;
+    private string? supabaseUserEmail;
+    private string? supabaseUrlInput;
+    private string? supabaseAnonKeyInput;
+    private string? supabaseEmailInput;
+    private string? supabasePasswordInput;
+    private bool isSupabaseSigningIn;
+    private bool isSupabaseSigningUp;
+    private bool isSupabaseBackingUp;
+    private bool isSupabaseRestoring;
+    private DateTimeOffset? supabaseLastBackupTime;
+
+    private bool IsSupabaseConfiguredViaFile => !string.IsNullOrEmpty(Configuration["Supabase:Url"]) && Configuration["Supabase:Url"] != "YOUR_SUPABASE_URL" &&
+        !string.IsNullOrEmpty(Configuration["Supabase:AnonKey"]) && Configuration["Supabase:AnonKey"] != "YOUR_ANON_KEY";
 
     // ===== Reset State =====
     private bool showConfirmation1;
@@ -359,6 +527,7 @@
             
             // Try to auto-initialize Google Drive if previously configured
             await TryInitializeGoogleDrive();
+            await TryInitializeSupabase();
         }
     }
 
@@ -595,7 +764,7 @@
             if (isAutoSyncEnabled)
             {
                 await AutoSyncService.DisableAsync();
-                isAutoSyncEnabled = false;
+                RefreshAutoSyncState();
             }
             
             statusMessage = Localizer["SuccessSignOut"];
@@ -692,7 +861,16 @@
     // Auto-sync methods
     private async Task OnAutoSyncToggled(ChangeEventArgs e)
     {
-        var newValue = (bool)(e.Value ?? false);
+        await ToggleAutoSync((bool)(e.Value ?? false), "Google Drive");
+    }
+
+    private async Task OnSupabaseAutoSyncToggled(ChangeEventArgs e)
+    {
+        await ToggleAutoSync((bool)(e.Value ?? false), "Supabase");
+    }
+
+    private async Task ToggleAutoSync(bool newValue, string providerName)
+    {
         isTogglingAutoSync = true;
         StateHasChanged();
         
@@ -700,18 +878,17 @@
         {
             if (newValue)
             {
-                await AutoSyncService.EnableAsync();
-                isAutoSyncEnabled = true;
+                await AutoSyncService.EnableAsync(providerName);
                 statusMessage = Localizer["SuccessAutoSyncEnabled"];
                 statusClass = "success";
             }
             else
             {
                 await AutoSyncService.DisableAsync();
-                isAutoSyncEnabled = false;
                 statusMessage = Localizer["SuccessAutoSyncDisabled"];
                 statusClass = "success";
             }
+            RefreshAutoSyncState();
         }
         catch (Exception ex)
         {
@@ -734,7 +911,9 @@
 
     private void RefreshAutoSyncState()
     {
-        isAutoSyncEnabled = AutoSyncService.IsEnabled;
+        var activeProvider = AutoSyncService.ActiveProviderName;
+        isAutoSyncEnabled = AutoSyncService.IsEnabled && activeProvider == "Google Drive";
+        isSupabaseAutoSyncEnabled = AutoSyncService.IsEnabled && activeProvider == "Supabase";
         autoSyncStatus = AutoSyncService.Status;
         lastAutoSyncTime = AutoSyncService.LastSyncTime;
     }
@@ -748,6 +927,276 @@
             AutoSyncStatus.Failed => "error",
             _ => "idle"
         };
+    }
+
+    // ===== Data Management - Supabase Methods =====
+    private async Task TryInitializeSupabase()
+    {
+        try
+        {
+            if (IsSupabaseConfiguredViaFile)
+            {
+                supabaseUrlInput = Configuration["Supabase:Url"];
+                supabaseAnonKeyInput = Configuration["Supabase:AnonKey"];
+                await JSRuntime.InvokeVoidAsync("supabaseInterop.initialize", supabaseUrlInput, supabaseAnonKeyInput);
+                isSupabaseConfigured = true;
+            }
+            else
+            {
+                var savedUrl = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "budgetr_supabase_url");
+                var savedKey = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "budgetr_supabase_anonkey");
+                if (!string.IsNullOrEmpty(savedUrl) && !string.IsNullOrEmpty(savedKey))
+                {
+                    await JSRuntime.InvokeVoidAsync("supabaseInterop.initialize", savedUrl, savedKey);
+                    isSupabaseConfigured = true;
+                }
+            }
+
+            if (isSupabaseConfigured)
+            {
+                isSupabaseSignedIn = await JSRuntime.InvokeAsync<bool>("supabaseInterop.isSignedIn");
+                
+                if (isSupabaseSignedIn)
+                {
+                    supabaseUserEmail = await JSRuntime.InvokeAsync<string?>("supabaseInterop.getUserEmail");
+                    await RefreshSupabaseBackupInfo();
+                }
+                
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to auto-initialize Supabase: {ex.Message}");
+        }
+    }
+
+    private async Task SwitchToSupabase()
+    {
+        activeTab = "supabase";
+        statusMessage = null;
+        
+        if (isSupabaseConfigured && isSupabaseSignedIn)
+        {
+            await RefreshSupabaseBackupInfo();
+        }
+    }
+
+    private async Task ConfigureSupabase()
+    {
+        if (!IsSupabaseConfiguredViaFile && (string.IsNullOrWhiteSpace(supabaseUrlInput) || string.IsNullOrWhiteSpace(supabaseAnonKeyInput)))
+            return;
+            
+        statusMessage = null;
+        
+        try
+        {
+            var url = IsSupabaseConfiguredViaFile ? Configuration["Supabase:Url"]! : supabaseUrlInput!;
+            var key = IsSupabaseConfiguredViaFile ? Configuration["Supabase:AnonKey"]! : supabaseAnonKeyInput!;
+            
+            if (!IsSupabaseConfiguredViaFile)
+            {
+                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "budgetr_supabase_url", url);
+                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "budgetr_supabase_anonkey", key);
+            }
+            
+            await JSRuntime.InvokeVoidAsync("supabaseInterop.initialize", url, key);
+            isSupabaseConfigured = true;
+            statusMessage = Localizer["SuccessSupabaseConfig"];
+            statusClass = "success";
+        }
+        catch (Exception ex)
+        {
+            statusMessage = Localizer["ErrorConfigFailed", ex.Message];
+            statusClass = "error";
+        }
+    }
+
+    private void ShowSupabaseReconfigure()
+    {
+        isSupabaseConfigured = false;
+        supabaseUrlInput = null;
+        supabaseAnonKeyInput = null;
+        statusMessage = null;
+    }
+
+    private async Task SignInWithSupabase()
+    {
+        if (string.IsNullOrWhiteSpace(supabaseEmailInput) || string.IsNullOrWhiteSpace(supabasePasswordInput))
+            return;
+            
+        isSupabaseSigningIn = true;
+        statusMessage = null;
+        StateHasChanged();
+        
+        try
+        {
+            await JSRuntime.InvokeAsync<bool>("supabaseInterop.signIn", supabaseEmailInput, supabasePasswordInput);
+            isSupabaseSignedIn = true;
+            supabaseUserEmail = await JSRuntime.InvokeAsync<string?>("supabaseInterop.getUserEmail");
+            await RefreshSupabaseBackupInfo();
+            statusMessage = Localizer["SuccessSignIn"];
+            statusClass = "success";
+            // Clear password field
+            supabasePasswordInput = null;
+        }
+        catch (Exception ex)
+        {
+            statusMessage = Localizer["ErrorSignInFailed", ex.Message];
+            statusClass = "error";
+        }
+        finally
+        {
+            isSupabaseSigningIn = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SignUpWithSupabase()
+    {
+        if (string.IsNullOrWhiteSpace(supabaseEmailInput) || string.IsNullOrWhiteSpace(supabasePasswordInput))
+            return;
+            
+        isSupabaseSigningUp = true;
+        statusMessage = null;
+        StateHasChanged();
+        
+        try
+        {
+            await JSRuntime.InvokeAsync<bool>("supabaseInterop.signUp", supabaseEmailInput, supabasePasswordInput);
+            // After sign-up, try to sign in automatically
+            await JSRuntime.InvokeAsync<bool>("supabaseInterop.signIn", supabaseEmailInput, supabasePasswordInput);
+            isSupabaseSignedIn = await JSRuntime.InvokeAsync<bool>("supabaseInterop.isSignedIn");
+            
+            if (isSupabaseSignedIn)
+            {
+                supabaseUserEmail = await JSRuntime.InvokeAsync<string?>("supabaseInterop.getUserEmail");
+                statusMessage = Localizer["SuccessSignUp"];
+                statusClass = "success";
+                supabasePasswordInput = null;
+            }
+            else
+            {
+                statusMessage = Localizer["SuccessSignUpConfirm"];
+                statusClass = "success";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = Localizer["ErrorSignUpFailed", ex.Message];
+            statusClass = "error";
+        }
+        finally
+        {
+            isSupabaseSigningUp = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SignOutFromSupabase()
+    {
+        try
+        {
+            // Disable auto-sync if it was active on Supabase
+            if (isSupabaseAutoSyncEnabled)
+            {
+                await AutoSyncService.DisableAsync();
+                RefreshAutoSyncState();
+            }
+            
+            await JSRuntime.InvokeVoidAsync("supabaseInterop.signOut");
+            isSupabaseSignedIn = false;
+            supabaseUserEmail = null;
+            supabaseLastBackupTime = null;
+            statusMessage = Localizer["SuccessSignOut"];
+            statusClass = "success";
+        }
+        catch (Exception ex)
+        {
+            statusMessage = Localizer["ErrorSignOutFailed", ex.Message];
+            statusClass = "error";
+        }
+        StateHasChanged();
+    }
+
+    private async Task RefreshSupabaseBackupInfo()
+    {
+        try
+        {
+            var lastModified = await JSRuntime.InvokeAsync<string?>("supabaseInterop.getLastBackupTime");
+            if (!string.IsNullOrEmpty(lastModified) && DateTimeOffset.TryParse(lastModified, out var parsed))
+            {
+                supabaseLastBackupTime = parsed;
+            }
+            else
+            {
+                supabaseLastBackupTime = null;
+            }
+        }
+        catch
+        {
+            supabaseLastBackupTime = null;
+        }
+    }
+
+    private async Task BackupToSupabase()
+    {
+        isSupabaseBackingUp = true;
+        statusMessage = null;
+        StateHasChanged();
+        
+        try
+        {
+            var json = TimeService.ExportData();
+            await JSRuntime.InvokeAsync<string?>("supabaseInterop.uploadData", json);
+            await RefreshSupabaseBackupInfo();
+            statusMessage = Localizer["SuccessBackup"];
+            statusClass = "success";
+        }
+        catch (Exception ex)
+        {
+            statusMessage = Localizer["ErrorBackupFailed", ex.Message];
+            statusClass = "error";
+        }
+        finally
+        {
+            isSupabaseBackingUp = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RestoreFromSupabase()
+    {
+        isSupabaseRestoring = true;
+        statusMessage = null;
+        StateHasChanged();
+        
+        try
+        {
+            var content = await JSRuntime.InvokeAsync<string?>("supabaseInterop.downloadData");
+            
+            if (string.IsNullOrEmpty(content))
+            {
+                statusMessage = Localizer["ErrorNoSupabaseBackup"];
+                statusClass = "error";
+            }
+            else
+            {
+                await TimeService.ImportDataAsync(content);
+                statusMessage = Localizer["SuccessSupabaseRestore"];
+                statusClass = "success";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = Localizer["ErrorRestoreFailed", ex.Message];
+            statusClass = "error";
+        }
+        finally
+        {
+            isSupabaseRestoring = false;
+            StateHasChanged();
+        }
     }
 
     // ===== Support Methods =====

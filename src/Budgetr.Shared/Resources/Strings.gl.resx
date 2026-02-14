@@ -433,4 +433,73 @@
   <data name="FutureEndTime" xml:space="preserve">
     <value>A hora de fin non pode ser no futuro.</value>
   </data>
+  <data name="TabSupabase" xml:space="preserve">
+    <value>Supabase</value>
+  </data>
+  <data name="SupabaseSync" xml:space="preserve">
+    <value>Sincronización con Supabase</value>
+  </data>
+  <data name="SupabaseDesc" xml:space="preserve">
+    <value>Fai copias de seguridade e restaura os teus datos usando a base de datos na nube de Supabase.</value>
+  </data>
+  <data name="SupabaseConfigNote" xml:space="preserve">
+    <value>Para usar a sincronización con Supabase, introduce a URL do teu proxecto e a clave anon do panel de Supabase.</value>
+  </data>
+  <data name="SupabaseUrl" xml:space="preserve">
+    <value>URL do proxecto:</value>
+  </data>
+  <data name="SupabaseAnonKey" xml:space="preserve">
+    <value>Clave anon:</value>
+  </data>
+  <data name="EnterSupabaseUrl" xml:space="preserve">
+    <value>https://o-teu-proxecto.supabase.co</value>
+  </data>
+  <data name="EnterAnonKey" xml:space="preserve">
+    <value>Introduce a túa clave anon</value>
+  </data>
+  <data name="SupabaseConfiguredViaFile" xml:space="preserve">
+    <value>Supabase está configurado mediante ficheiro de axustes.</value>
+  </data>
+  <data name="SuccessSupabaseConfig" xml:space="preserve">
+    <value>Supabase configurado correctamente!</value>
+  </data>
+  <data name="SignInEmail" xml:space="preserve">
+    <value>Correo electrónico:</value>
+  </data>
+  <data name="SignInPassword" xml:space="preserve">
+    <value>Contrasinal:</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Iniciar sesión</value>
+  </data>
+  <data name="SignUp" xml:space="preserve">
+    <value>Rexistrarse</value>
+  </data>
+  <data name="SigningUp" xml:space="preserve">
+    <value>Rexistrando...</value>
+  </data>
+  <data name="SuccessSignUp" xml:space="preserve">
+    <value>Conta creada e sesión iniciada correctamente!</value>
+  </data>
+  <data name="SuccessSignUpConfirm" xml:space="preserve">
+    <value>Conta creada! Comproba o teu correo para confirmar e logo inicia sesión.</value>
+  </data>
+  <data name="ErrorSignUpFailed" xml:space="preserve">
+    <value>Erro ao rexistrarse: {0}</value>
+  </data>
+  <data name="ReconfigureSupabase" xml:space="preserve">
+    <value>Reconfigurar Supabase</value>
+  </data>
+  <data name="BackupToSupabase" xml:space="preserve">
+    <value>Backup en Supabase</value>
+  </data>
+  <data name="RestoreFromSupabase" xml:space="preserve">
+    <value>Restaurar dende Supabase</value>
+  </data>
+  <data name="ErrorNoSupabaseBackup" xml:space="preserve">
+    <value>Non se atopou ningunha copia en Supabase.</value>
+  </data>
+  <data name="SuccessSupabaseRestore" xml:space="preserve">
+    <value>Datos restaurados con éxito dende Supabase!</value>
+  </data>
 </root>

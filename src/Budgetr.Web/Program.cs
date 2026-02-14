@@ -19,6 +19,9 @@ builder.Services.AddScoped<IMeterConfigurationService, MeterConfigurationService
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<ITimeTrackingService, TimeTrackingService>();
 builder.Services.AddScoped<GoogleDriveService>();
+builder.Services.AddScoped<SupabaseService>();
+builder.Services.AddScoped<ISyncProvider, GoogleDriveSyncProvider>();
+builder.Services.AddScoped<ISyncProvider, SupabaseSyncProvider>();
 builder.Services.AddScoped<IAutoSyncService, AutoSyncService>();
 builder.Services.AddScoped<IPwaService, PwaService>();
 builder.Services.AddScoped<ITutorialService, TutorialService>();

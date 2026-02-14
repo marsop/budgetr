@@ -436,4 +436,73 @@
   <data name="FutureEndTime" xml:space="preserve">
     <value>End time cannot be in the future.</value>
   </data>
+  <data name="TabSupabase" xml:space="preserve">
+    <value>Supabase</value>
+  </data>
+  <data name="SupabaseSync" xml:space="preserve">
+    <value>Supabase Sync</value>
+  </data>
+  <data name="SupabaseDesc" xml:space="preserve">
+    <value>Backup and restore your data using Supabase cloud database.</value>
+  </data>
+  <data name="SupabaseConfigNote" xml:space="preserve">
+    <value>To use Supabase sync, enter your project URL and anon key from the Supabase dashboard.</value>
+  </data>
+  <data name="SupabaseUrl" xml:space="preserve">
+    <value>Project URL:</value>
+  </data>
+  <data name="SupabaseAnonKey" xml:space="preserve">
+    <value>Anon Key:</value>
+  </data>
+  <data name="EnterSupabaseUrl" xml:space="preserve">
+    <value>https://your-project.supabase.co</value>
+  </data>
+  <data name="EnterAnonKey" xml:space="preserve">
+    <value>Enter your anon key</value>
+  </data>
+  <data name="SupabaseConfiguredViaFile" xml:space="preserve">
+    <value>Supabase is configured via settings file.</value>
+  </data>
+  <data name="SuccessSupabaseConfig" xml:space="preserve">
+    <value>Supabase configured successfully!</value>
+  </data>
+  <data name="SignInEmail" xml:space="preserve">
+    <value>Email:</value>
+  </data>
+  <data name="SignInPassword" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Sign In</value>
+  </data>
+  <data name="SignUp" xml:space="preserve">
+    <value>Sign Up</value>
+  </data>
+  <data name="SigningUp" xml:space="preserve">
+    <value>Signing up...</value>
+  </data>
+  <data name="SuccessSignUp" xml:space="preserve">
+    <value>Account created and signed in successfully!</value>
+  </data>
+  <data name="SuccessSignUpConfirm" xml:space="preserve">
+    <value>Account created! Please check your email to confirm, then sign in.</value>
+  </data>
+  <data name="ErrorSignUpFailed" xml:space="preserve">
+    <value>Sign up failed: {0}</value>
+  </data>
+  <data name="ReconfigureSupabase" xml:space="preserve">
+    <value>Reconfigure Supabase</value>
+  </data>
+  <data name="BackupToSupabase" xml:space="preserve">
+    <value>Backup to Supabase</value>
+  </data>
+  <data name="RestoreFromSupabase" xml:space="preserve">
+    <value>Restore from Supabase</value>
+  </data>
+  <data name="ErrorNoSupabaseBackup" xml:space="preserve">
+    <value>No backup found in Supabase.</value>
+  </data>
+  <data name="SuccessSupabaseRestore" xml:space="preserve">
+    <value>Data restored successfully from Supabase!</value>
+  </data>
 </root>

@@ -433,4 +433,73 @@
   <data name="FutureEndTime" xml:space="preserve">
     <value>D'Endzit derf nöd in dr Zuakunft si.</value>
   </data>
+  <data name="TabSupabase" xml:space="preserve">
+    <value>Supabase</value>
+  </data>
+  <data name="SupabaseSync" xml:space="preserve">
+    <value>Supabase Sync</value>
+  </data>
+  <data name="SupabaseDesc" xml:space="preserve">
+    <value>Data sichara und wiederhola mit dr Supabase Cloud-Datebank.</value>
+  </data>
+  <data name="SupabaseConfigNote" xml:space="preserve">
+    <value>Für da Supabase Sync bruuchst d'Projekt-URL und da Anon-Key vom Supabase Dashboard.</value>
+  </data>
+  <data name="SupabaseUrl" xml:space="preserve">
+    <value>Projekt-URL:</value>
+  </data>
+  <data name="SupabaseAnonKey" xml:space="preserve">
+    <value>Anon-Key:</value>
+  </data>
+  <data name="EnterSupabaseUrl" xml:space="preserve">
+    <value>https://dis-projekt.supabase.co</value>
+  </data>
+  <data name="EnterAnonKey" xml:space="preserve">
+    <value>Schrieb din Anon-Key ana</value>
+  </data>
+  <data name="SupabaseConfiguredViaFile" xml:space="preserve">
+    <value>Supabase isch über d'Istellungsdatei konfiguriert.</value>
+  </data>
+  <data name="SuccessSupabaseConfig" xml:space="preserve">
+    <value>Supabase isch iigstellt!</value>
+  </data>
+  <data name="SignInEmail" xml:space="preserve">
+    <value>E-Mail:</value>
+  </data>
+  <data name="SignInPassword" xml:space="preserve">
+    <value>Passwort:</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Amelda</value>
+  </data>
+  <data name="SignUp" xml:space="preserve">
+    <value>Registriera</value>
+  </data>
+  <data name="SigningUp" xml:space="preserve">
+    <value>Registriert...</value>
+  </data>
+  <data name="SuccessSignUp" xml:space="preserve">
+    <value>Konto erstellt und agmeldet!</value>
+  </data>
+  <data name="SuccessSignUpConfirm" xml:space="preserve">
+    <value>Konto erstellt! Luag in dina E-Mail noo und meld di dann a.</value>
+  </data>
+  <data name="ErrorSignUpFailed" xml:space="preserve">
+    <value>Registrierig fehlgschlaga: {0}</value>
+  </data>
+  <data name="ReconfigureSupabase" xml:space="preserve">
+    <value>Supabase neu iistella</value>
+  </data>
+  <data name="BackupToSupabase" xml:space="preserve">
+    <value>Uf Supabase sichara</value>
+  </data>
+  <data name="RestoreFromSupabase" xml:space="preserve">
+    <value>Vo Supabase kloo</value>
+  </data>
+  <data name="ErrorNoSupabaseBackup" xml:space="preserve">
+    <value>Koane Sicherung uf Supabase gfunda.</value>
+  </data>
+  <data name="SuccessSupabaseRestore" xml:space="preserve">
+    <value>Data vo Supabase kloo!</value>
+  </data>
 </root>

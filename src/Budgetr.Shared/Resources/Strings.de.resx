@@ -433,4 +433,73 @@
   <data name="FutureEndTime" xml:space="preserve">
     <value>Die Endzeit darf nicht in der Zukunft liegen.</value>
   </data>
+  <data name="TabSupabase" xml:space="preserve">
+    <value>Supabase</value>
+  </data>
+  <data name="SupabaseSync" xml:space="preserve">
+    <value>Supabase-Synchronisierung</value>
+  </data>
+  <data name="SupabaseDesc" xml:space="preserve">
+    <value>Sichern und Wiederherstellen Ihrer Daten über die Supabase-Cloud-Datenbank.</value>
+  </data>
+  <data name="SupabaseConfigNote" xml:space="preserve">
+    <value>Geben Sie zur Nutzung der Supabase-Synchronisierung Ihre Projekt-URL und den Anon-Key aus dem Supabase-Dashboard ein.</value>
+  </data>
+  <data name="SupabaseUrl" xml:space="preserve">
+    <value>Projekt-URL:</value>
+  </data>
+  <data name="SupabaseAnonKey" xml:space="preserve">
+    <value>Anon-Key:</value>
+  </data>
+  <data name="EnterSupabaseUrl" xml:space="preserve">
+    <value>https://ihr-projekt.supabase.co</value>
+  </data>
+  <data name="EnterAnonKey" xml:space="preserve">
+    <value>Geben Sie Ihren Anon-Key ein</value>
+  </data>
+  <data name="SupabaseConfiguredViaFile" xml:space="preserve">
+    <value>Supabase ist über die Einstellungsdatei konfiguriert.</value>
+  </data>
+  <data name="SuccessSupabaseConfig" xml:space="preserve">
+    <value>Supabase erfolgreich konfiguriert!</value>
+  </data>
+  <data name="SignInEmail" xml:space="preserve">
+    <value>E-Mail:</value>
+  </data>
+  <data name="SignInPassword" xml:space="preserve">
+    <value>Passwort:</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="SignUp" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="SigningUp" xml:space="preserve">
+    <value>Registrierung...</value>
+  </data>
+  <data name="SuccessSignUp" xml:space="preserve">
+    <value>Konto erstellt und erfolgreich angemeldet!</value>
+  </data>
+  <data name="SuccessSignUpConfirm" xml:space="preserve">
+    <value>Konto erstellt! Bitte bestätigen Sie Ihre E-Mail und melden Sie sich dann an.</value>
+  </data>
+  <data name="ErrorSignUpFailed" xml:space="preserve">
+    <value>Registrierung fehlgeschlagen: {0}</value>
+  </data>
+  <data name="ReconfigureSupabase" xml:space="preserve">
+    <value>Supabase neu konfigurieren</value>
+  </data>
+  <data name="BackupToSupabase" xml:space="preserve">
+    <value>In Supabase sichern</value>
+  </data>
+  <data name="RestoreFromSupabase" xml:space="preserve">
+    <value>Von Supabase wiederherstellen</value>
+  </data>
+  <data name="ErrorNoSupabaseBackup" xml:space="preserve">
+    <value>Kein Backup in Supabase gefunden.</value>
+  </data>
+  <data name="SuccessSupabaseRestore" xml:space="preserve">
+    <value>Daten erfolgreich von Supabase wiederhergestellt!</value>
+  </data>
 </root>
