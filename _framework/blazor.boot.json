@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Budgetr.Web",
   "resources": {
-    "hash": "sha256-6e2zez9qmDFzMNd7poPm0QgfUZrajsfVHCbT4zaE8Q0=",
+    "hash": "sha256-UWa8jzJYCSkNayHhuXmra19yL2pkhDlg/iOCGOUudLc=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.c12s8ld35l.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Web.iepurjfayl.wasm": "Microsoft.AspNetCore.Components.Web.wasm",
@@ -47,12 +47,12 @@
       "System.Text.RegularExpressions.vbr1gezq3a.wasm": "System.Text.RegularExpressions.wasm",
       "System.Threading.n5ppejuuhz.wasm": "System.Threading.wasm",
       "System.Private.CoreLib.o7johkjohg.wasm": "System.Private.CoreLib.wasm",
-      "Budgetr.Shared.bk3ofjwrmr.wasm": "Budgetr.Shared.wasm",
-      "Budgetr.Web.7skpmrk3a3.wasm": "Budgetr.Web.wasm",
-      "Budgetr.Shared.resources.02yts97z30.wasm": "Budgetr.Shared.resources.wasm",
-      "Budgetr.Shared.resources.mu6sqd77yo.wasm": "Budgetr.Shared.resources.wasm",
-      "Budgetr.Shared.resources.7vzgb9jlob.wasm": "Budgetr.Shared.resources.wasm",
-      "Budgetr.Shared.resources.6asqeyrq5h.wasm": "Budgetr.Shared.resources.wasm",
+      "Budgetr.Shared.so0ncndt2z.wasm": "Budgetr.Shared.wasm",
+      "Budgetr.Web.wvdomwagya.wasm": "Budgetr.Web.wasm",
+      "Budgetr.Shared.resources.o0sw0ointn.wasm": "Budgetr.Shared.resources.wasm",
+      "Budgetr.Shared.resources.4kc9qo9e1m.wasm": "Budgetr.Shared.resources.wasm",
+      "Budgetr.Shared.resources.td9xvfyjg7.wasm": "Budgetr.Shared.resources.wasm",
+      "Budgetr.Shared.resources.zn2w84v2p6.wasm": "Budgetr.Shared.resources.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.xidrk0eo52.js": "dotnet.native.js",
       "dotnet.native.y68cfu4kuf.wasm": "dotnet.native.wasm",
@@ -118,21 +118,21 @@
       "System.Text.Json.l6ijlcrrmp.wasm": "sha256-M8imoBF0BGyd0yvZoocrWf4iWPknZn/ZnStL2BofX1s=",
       "System.Text.RegularExpressions.vbr1gezq3a.wasm": "sha256-ZQejR0x7+S2JJA2Z1IkLWqWXukLRjL/c/zguib2fpHo=",
       "System.Threading.n5ppejuuhz.wasm": "sha256-ZVqAdmVQkqedPOVid8yORJq6/P4I+NlvR19QR4PIQfY=",
-      "Budgetr.Shared.bk3ofjwrmr.wasm": "sha256-9Xy/0qz5z/3KDs/KQkksoiZGCaew805oxd8sU0nKZjU=",
-      "Budgetr.Web.7skpmrk3a3.wasm": "sha256-iaicLxDzn/SodzMc1SXevwydkHeAKTnGGsnwPHabSCU="
+      "Budgetr.Shared.so0ncndt2z.wasm": "sha256-PLtH7rNecLYq9ainFf+YuczrmGjelmkpgx3tb1E1P5g=",
+      "Budgetr.Web.wvdomwagya.wasm": "sha256-TFJ+CK4h9T8UAFCmmj2I9d/UzQsTB/QM0zECmeRH3Cw="
     },
     "satelliteResources": {
       "gl": {
-        "Budgetr.Shared.resources.02yts97z30.wasm": "sha256-qOFhOVt21fEm/mBqPc6QomfSztycxezoray8NRQ4ANA="
+        "Budgetr.Shared.resources.o0sw0ointn.wasm": "sha256-2JV24+yn2GUlyb0ww+QFJZIs5F1OqBGl10bg+aMqykc="
       },
       "de": {
-        "Budgetr.Shared.resources.mu6sqd77yo.wasm": "sha256-ru/37IzYROFkieZew+KUvXBoEtuY8ZW4tRb5n1eM/a8="
+        "Budgetr.Shared.resources.4kc9qo9e1m.wasm": "sha256-1HEI8JpMnLAzxPAzvKEYQkUgMyS9r0kIV3HeHpakmiA="
       },
       "gsw": {
-        "Budgetr.Shared.resources.7vzgb9jlob.wasm": "sha256-bcfMbMDlAzGtvJSD7ktF/slKfemDXukjEAlbscHiWy0="
+        "Budgetr.Shared.resources.td9xvfyjg7.wasm": "sha256-wahcNxrG+Vlp7ZNC3SWcrE32nQVclmc+utuJxn7IrzE="
       },
       "es": {
-        "Budgetr.Shared.resources.6asqeyrq5h.wasm": "sha256-UiiKcIq8IzaBVxPUTum2tl8rG/FRI4mVALhLh2YTvX4="
+        "Budgetr.Shared.resources.zn2w84v2p6.wasm": "sha256-f92Op1cRqRpmQoNE7aItqxyi4x3grTgdFrx0fkEN+Fg="
       }
     }
   },
