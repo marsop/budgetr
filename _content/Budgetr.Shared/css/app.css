@@ -1759,3 +1759,28 @@ body {
 .support-btn .btn-icon {
     font-size: 1.25rem;
 }
+
+/* ===== Drag and Drop ===== */
+
+.meter-container.dragging {
+    opacity: 0.35;
+    transform: scale(0.95);
+    transition: all var(--transition-fast);
+}
+
+.meter-container.dragging .meter-button {
+    border-style: dashed;
+    border-color: var(--color-accent);
+}
+
+.meter-container.drag-over {
+    transform: scale(1.03);
+    transition: all var(--transition-fast);
+}
+
+.meter-container.drag-over .meter-button {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 20px var(--color-accent-glow), inset 0 0 15px rgba(99, 102, 241, 0.08);
+    background: rgba(99, 102, 241, 0.06);
+}
+
