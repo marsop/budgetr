@@ -92,6 +92,32 @@ public class TimeTrackingService : ITimeTrackingService
         }
     }
 
+    public void UpdateEventTimes(Guid eventId, DateTimeOffset newStartTime, DateTimeOffset newEndTime)
+    {
+        var meterEvent = _account.Events.FirstOrDefault(e => e.Id == eventId);
+        if (meterEvent == null) return;
+
+        if (meterEvent.IsActive)
+        {
+            throw new InvalidOperationException("Cannot edit times of an active event.");
+        }
+
+        if (newStartTime >= newEndTime)
+        {
+            throw new ArgumentException("Start time must be before end time.");
+        }
+
+        if (newEndTime > DateTimeOffset.UtcNow)
+        {
+            throw new ArgumentException("End time cannot be in the future.");
+        }
+
+        meterEvent.StartTime = newStartTime;
+        meterEvent.EndTime = newEndTime;
+        OnStateChanged?.Invoke();
+        _ = SaveAsync();
+    }
+
     public List<TimelineDataPoint> GetTimelineData(TimeSpan period)
     {
         var points = new List<TimelineDataPoint>();

@@ -418,4 +418,22 @@
   <data name="ClientIdConfiguredViaFile" xml:space="preserve">
     <value>Client ID is configured via file.</value>
   </data>
+  <data name="EditTimes" xml:space="preserve">
+    <value>Edit times</value>
+  </data>
+  <data name="EditTimesTitle" xml:space="preserve">
+    <value>Edit Event Times</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Start Time</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>End Time</value>
+  </data>
+  <data name="EndBeforeStart" xml:space="preserve">
+    <value>End time must be after start time.</value>
+  </data>
+  <data name="FutureEndTime" xml:space="preserve">
+    <value>End time cannot be in the future.</value>
+  </data>
 </root>

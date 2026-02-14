@@ -415,4 +415,22 @@
   <data name="BuyMeACoffee" xml:space="preserve">
     <value>Spendier mr an Kafi</value>
   </data>
+  <data name="EditTimes" xml:space="preserve">
+    <value>Zita bearbeita</value>
+  </data>
+  <data name="EditTimesTitle" xml:space="preserve">
+    <value>Ereigniszita bearbeita</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Startzit</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>Endzit</value>
+  </data>
+  <data name="EndBeforeStart" xml:space="preserve">
+    <value>D'Endzit muass noch dr Startzit si.</value>
+  </data>
+  <data name="FutureEndTime" xml:space="preserve">
+    <value>D'Endzit derf nöd in dr Zuakunft si.</value>
+  </data>
 </root>

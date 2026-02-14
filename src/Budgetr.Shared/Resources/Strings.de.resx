@@ -415,4 +415,22 @@
   <data name="BuyMeACoffee" xml:space="preserve">
     <value>Spendier mir einen Kaffee</value>
   </data>
+  <data name="EditTimes" xml:space="preserve">
+    <value>Zeiten bearbeiten</value>
+  </data>
+  <data name="EditTimesTitle" xml:space="preserve">
+    <value>Ereigniszeiten bearbeiten</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Startzeit</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>Endzeit</value>
+  </data>
+  <data name="EndBeforeStart" xml:space="preserve">
+    <value>Die Endzeit muss nach der Startzeit liegen.</value>
+  </data>
+  <data name="FutureEndTime" xml:space="preserve">
+    <value>Die Endzeit darf nicht in der Zukunft liegen.</value>
+  </data>
 </root>
