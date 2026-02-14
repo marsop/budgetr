@@ -790,6 +790,90 @@ body {
     box-shadow: var(--shadow-glow-negative);
 }
 
+.edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    transition: all var(--transition-fast);
+}
+
+.edit-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--color-accent);
+}
+
+.btn-save {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+    background: var(--color-accent);
+    color: white;
+}
+
+.btn-save:hover {
+    background: #5457e5;
+    box-shadow: 0 0 20px var(--color-accent-glow);
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.edit-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.edit-input {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    transition: border-color var(--transition-fast);
+    color-scheme: dark;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.edit-error {
+    font-size: var(--font-size-sm);
+    color: var(--color-negative);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
 /* ===== Sync Page ===== */
 
 .sync-page {
@@ -1721,7 +1805,7 @@ body {
     flex-shrink: 0;
     border-radius: 2px;
     overflow: hidden;
-    box-shadow: 0 0 2px rgba(0,0,0,0.2);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
 .flag-icon svg {
@@ -1783,4 +1867,3 @@ body {
     box-shadow: 0 0 20px var(--color-accent-glow), inset 0 0 15px rgba(99, 102, 241, 0.08);
     background: rgba(99, 102, 241, 0.06);
 }
-

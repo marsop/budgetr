@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Budgetr.Web",
   "resources": {
-    "hash": "sha256-1WAQpw+N+/MkwXS2FSfl5aDGFeYkeAO64IQOtiotqTg=",
+    "hash": "sha256-hZ0uepEHl6AKfhPjwrovo2bWTiAQn1t46YJkrXzab78=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.c12s8ld35l.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Web.iepurjfayl.wasm": "Microsoft.AspNetCore.Components.Web.wasm",
@@ -46,13 +46,13 @@
       "System.Text.Json.l6ijlcrrmp.wasm": "System.Text.Json.wasm",
       "System.Text.RegularExpressions.vbr1gezq3a.wasm": "System.Text.RegularExpressions.wasm",
       "System.Threading.n5ppejuuhz.wasm": "System.Threading.wasm",
-      "System.Private.CoreLib.r5fola5jjl.wasm": "System.Private.CoreLib.wasm",
-      "Budgetr.Shared.tfdyk6898p.wasm": "Budgetr.Shared.wasm",
-      "Budgetr.Web.j399ahi8uw.wasm": "Budgetr.Web.wasm",
-      "Budgetr.Shared.resources.hms4go5jom.wasm": "Budgetr.Shared.resources.wasm",
-      "Budgetr.Shared.resources.su2sxv120m.wasm": "Budgetr.Shared.resources.wasm",
-      "Budgetr.Shared.resources.6rls7lyc9p.wasm": "Budgetr.Shared.resources.wasm",
-      "Budgetr.Shared.resources.akigspw7gd.wasm": "Budgetr.Shared.resources.wasm",
+      "System.Private.CoreLib.o7johkjohg.wasm": "System.Private.CoreLib.wasm",
+      "Budgetr.Shared.tcm6ca2n4r.wasm": "Budgetr.Shared.wasm",
+      "Budgetr.Web.4xoqqyo4ae.wasm": "Budgetr.Web.wasm",
+      "Budgetr.Shared.resources.uq5e4yksb8.wasm": "Budgetr.Shared.resources.wasm",
+      "Budgetr.Shared.resources.t343qgmwy5.wasm": "Budgetr.Shared.resources.wasm",
+      "Budgetr.Shared.resources.qnmeseket1.wasm": "Budgetr.Shared.resources.wasm",
+      "Budgetr.Shared.resources.ffykl5k8of.wasm": "Budgetr.Shared.resources.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.xidrk0eo52.js": "dotnet.native.js",
       "dotnet.native.y68cfu4kuf.wasm": "dotnet.native.wasm",
@@ -73,7 +73,7 @@
     },
     "coreAssembly": {
       "System.Runtime.InteropServices.JavaScript.86ud3rg0f2.wasm": "sha256-AAnORgj9Ao176Q0otUTy5BKaRjOgxF7p4H8d6UP6Ks0=",
-      "System.Private.CoreLib.r5fola5jjl.wasm": "sha256-QfDYGuk2Ee2kENr342fo02sO/Ylym6rzeVM+ShswT0s="
+      "System.Private.CoreLib.o7johkjohg.wasm": "sha256-RCgfDOqOLTssHOphc2yqqali8GGWZJlbgfSV+pCrOGA="
     },
     "assembly": {
       "Microsoft.AspNetCore.Components.c12s8ld35l.wasm": "sha256-sPo35H4SfFKjsN/HVTEy36MMUjkyCaGrTF+exO75BAk=",
@@ -118,21 +118,21 @@
       "System.Text.Json.l6ijlcrrmp.wasm": "sha256-M8imoBF0BGyd0yvZoocrWf4iWPknZn/ZnStL2BofX1s=",
       "System.Text.RegularExpressions.vbr1gezq3a.wasm": "sha256-ZQejR0x7+S2JJA2Z1IkLWqWXukLRjL/c/zguib2fpHo=",
       "System.Threading.n5ppejuuhz.wasm": "sha256-ZVqAdmVQkqedPOVid8yORJq6/P4I+NlvR19QR4PIQfY=",
-      "Budgetr.Shared.tfdyk6898p.wasm": "sha256-d1sy8CZBH66ygVlWTty2fShSEBvMqKW/dHQuxTdTly0=",
-      "Budgetr.Web.j399ahi8uw.wasm": "sha256-sRsVTABvxX7/K4SSF3OnEqBkn5gvqqcfz49LA4GIEss="
+      "Budgetr.Shared.tcm6ca2n4r.wasm": "sha256-rYrYS9idsV5tomq7QeVkpKkCw2OSBzLSqUqcm+ZaPO0=",
+      "Budgetr.Web.4xoqqyo4ae.wasm": "sha256-qKLrlWjgt+QezYbN8Os7eucDsQtc7l/9p06fKaZfpWo="
     },
     "satelliteResources": {
       "gl": {
-        "Budgetr.Shared.resources.hms4go5jom.wasm": "sha256-FxaZOZlpJ9P9khUZaCZliWm/Lw/RogkJkNyc6jxkOYo="
+        "Budgetr.Shared.resources.uq5e4yksb8.wasm": "sha256-lqDB/20x3RtaL1Efp/ADDF2J8X/+kEGdw+BVA64fJ7A="
       },
       "de": {
-        "Budgetr.Shared.resources.su2sxv120m.wasm": "sha256-jNUAR23He3C8c5YA4+NDp9Rl2yIga2y/AOhLQ4FldOw="
+        "Budgetr.Shared.resources.t343qgmwy5.wasm": "sha256-d84/erj+T7K3ia248e2Ewhz9JoiwYfR8vM9Vb4Ow004="
       },
       "gsw": {
-        "Budgetr.Shared.resources.6rls7lyc9p.wasm": "sha256-Ilh/cOVWm74IOV+gwaoA4XirMftgzxGQZXU0B943Dm4="
+        "Budgetr.Shared.resources.qnmeseket1.wasm": "sha256-Nr6C0VsSRoUl9iB8LTgyxcPmrKZV9j3gPb9+wjZWJvE="
       },
       "es": {
-        "Budgetr.Shared.resources.akigspw7gd.wasm": "sha256-Bt5yC2JnMrTshDJz/CxJAKCivL2gbtr0gQUWHosGc3o="
+        "Budgetr.Shared.resources.ffykl5k8of.wasm": "sha256-tWt+D2+TuwSDCIsadr88hrrxdJeDpTst9KSThwIY8pA="
       }
     }
   },
