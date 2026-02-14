@@ -960,6 +960,7 @@
                 {
                     supabaseUserEmail = await JSRuntime.InvokeAsync<string?>("supabaseInterop.getUserEmail");
                     await RefreshSupabaseBackupInfo();
+                    RefreshAutoSyncState();
                 }
                 
                 StateHasChanged();
