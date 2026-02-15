@@ -1,5 +1,4 @@
 using Budgetr.Shared.Services;
-using Microsoft.JSInterop;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
@@ -14,14 +13,13 @@ public class AutoSyncService : IAutoSyncService
 {
     private readonly ITimeTrackingService _timeService;
     private readonly IStorageService _storage;
-    private readonly IJSRuntime _js;
     private readonly IServiceProvider _serviceProvider;
-    
+
     private const string EnabledProviderStorageKey = "budgetr_autosync_provider";
     private const string LastSyncStorageKeyPrefix = "budgetr_autosync_lastsync_";
     private const int DebounceMilliseconds = 1000;
     private const int PollingIntervalSeconds = 30;
-    
+
     private readonly Subject<bool> _changeSubject = new();
     private IDisposable? _subscription;
     private IDisposable? _pollingSubscription;
@@ -30,28 +28,26 @@ public class AutoSyncService : IAutoSyncService
     private DateTimeOffset? _lastSyncTime;
     private DateTimeOffset? _lastKnownRemoteModifiedTime;
     private AutoSyncStatus _status = AutoSyncStatus.Idle;
-    
+
     private ISyncProvider? _activeProvider;
     private string? _activeProviderName;
-    
+
     public bool IsEnabled => _isEnabled;
     public string? ActiveProviderName => _activeProviderName;
     public DateTimeOffset? LastSyncTime => _lastSyncTime;
     public AutoSyncStatus Status => _status;
-    
+
     public event Action<AutoSyncStatus>? OnStatusChanged;
 
     public AutoSyncService(
         ITimeTrackingService timeService,
         IStorageService storage,
-        IJSRuntime js,
         IServiceProvider serviceProvider)
     {
         _timeService = timeService;
         _storage = storage;
-        _js = js;
         _serviceProvider = serviceProvider;
-        
+
         // Subscribe to time service state changes and push to reactive stream
         _timeService.OnStateChanged += OnDataChanged;
     }
@@ -78,32 +74,32 @@ public class AutoSyncService : IAutoSyncService
         {
             await DisableAsync();
         }
-        
+
         if (_isEnabled && _activeProviderName == providerName)
             return;
-        
+
         // Resolve the provider
         var provider = ResolveProvider(providerName);
         if (provider == null)
         {
             throw new InvalidOperationException($"Sync provider '{providerName}' not found.");
         }
-            
+
         // Check if the provider is authenticated
         var isSignedIn = await provider.IsAuthenticatedAsync();
         if (!isSignedIn)
         {
             throw new InvalidOperationException($"Please sign in to {providerName} first.");
         }
-        
+
         _activeProvider = provider;
         _activeProviderName = providerName;
         _isEnabled = true;
         await _storage.SetItemAsync(EnabledProviderStorageKey, providerName);
-        
+
         // Load last sync time for this provider
         await LoadLastSyncTimeAsync();
-        
+
         // Initialize last known remote time to avoid immediate restore loop if we just synced
         if (_lastSyncTime.HasValue)
         {
@@ -111,19 +107,19 @@ public class AutoSyncService : IAutoSyncService
         }
         else
         {
-             // If we have never synced, try to get the current remote time so we only restore *new* changes
-             _lastKnownRemoteModifiedTime = await _activeProvider.GetLastBackupTimeAsync();
+            // If we have never synced, try to get the current remote time so we only restore *new* changes
+            _lastKnownRemoteModifiedTime = await _activeProvider.GetLastBackupTimeAsync();
         }
 
         // Set up debounced subscription using Rx.NET
         _subscription = _changeSubject
             .Throttle(TimeSpan.FromMilliseconds(DebounceMilliseconds))
             .Subscribe(async _ => await PerformSyncAsync());
-            
+
         // Set up polling for remote changes
         _pollingSubscription = Observable.Interval(TimeSpan.FromSeconds(PollingIntervalSeconds))
             .Subscribe(async _ => await CheckForRemoteChangesAsync());
-        
+
         UpdateStatus(AutoSyncStatus.Idle);
     }
 
@@ -131,19 +127,19 @@ public class AutoSyncService : IAutoSyncService
     {
         if (!_isEnabled)
             return;
-            
+
         _isEnabled = false;
         _activeProvider = null;
         _activeProviderName = null;
         await _storage.SetItemAsync(EnabledProviderStorageKey, "");
-        
+
         // Dispose subscriptions
         _subscription?.Dispose();
         _subscription = null;
-        
+
         _pollingSubscription?.Dispose();
         _pollingSubscription = null;
-        
+
         UpdateStatus(AutoSyncStatus.Idle);
     }
 
@@ -151,11 +147,11 @@ public class AutoSyncService : IAutoSyncService
     {
         if (!_isEnabled || _isRestoring || _activeProvider == null)
             return;
-            
+
         try
         {
             UpdateStatus(AutoSyncStatus.Syncing);
-            
+
             // Check if still signed in
             var isSignedIn = await _activeProvider.IsAuthenticatedAsync();
             if (!isSignedIn)
@@ -165,11 +161,11 @@ public class AutoSyncService : IAutoSyncService
                 UpdateStatus(AutoSyncStatus.Failed);
                 return;
             }
-            
+
             // Export and upload data
             var json = _timeService.ExportData();
             await _activeProvider.UploadDataAsync(json);
-            
+
             // Update last sync time
             _lastSyncTime = DateTimeOffset.UtcNow;
             var modifiedTime = await _activeProvider.GetLastBackupTimeAsync();
@@ -177,10 +173,10 @@ public class AutoSyncService : IAutoSyncService
             {
                 _lastKnownRemoteModifiedTime = modifiedTime;
             }
-            
+
             var storageKey = LastSyncStorageKeyPrefix + _activeProviderName;
             await _storage.SetItemAsync(storageKey, _lastSyncTime.Value.ToString("O"));
-            
+
             UpdateStatus(AutoSyncStatus.Success);
             Console.WriteLine($"Auto-sync ({_activeProviderName}): Backup completed at {_lastSyncTime}");
         }
@@ -190,21 +186,21 @@ public class AutoSyncService : IAutoSyncService
             UpdateStatus(AutoSyncStatus.Failed);
         }
     }
-    
+
     private async Task CheckForRemoteChangesAsync()
     {
         if (!_isEnabled || _isRestoring || _activeProvider == null)
             return;
-            
+
         try
         {
             if (!await _activeProvider.IsAuthenticatedAsync())
                 return;
 
             var remoteModified = await _activeProvider.GetLastBackupTimeAsync();
-            
+
             // If remote file exists and is newer than what we last knew about
-            if (remoteModified.HasValue && 
+            if (remoteModified.HasValue &&
                 (!_lastKnownRemoteModifiedTime.HasValue || remoteModified.Value > _lastKnownRemoteModifiedTime.Value + TimeSpan.FromSeconds(1)))
             {
                 Console.WriteLine($"Auto-sync ({_activeProviderName}): Detected remote change. Local: {_lastKnownRemoteModifiedTime}, Remote: {remoteModified}");
@@ -216,26 +212,26 @@ public class AutoSyncService : IAutoSyncService
             Console.WriteLine($"Auto-sync ({_activeProviderName}) polling failed: {ex.Message}");
         }
     }
-    
+
     private async Task RestoreDataAsync(DateTimeOffset remoteModifiedTime)
     {
         if (_activeProvider == null) return;
-        
+
         try
         {
             _isRestoring = true;
             UpdateStatus(AutoSyncStatus.Syncing);
-            
+
             var content = await _activeProvider.DownloadDataAsync();
             if (!string.IsNullOrEmpty(content))
             {
                 await _timeService.ImportDataAsync(content);
                 _lastKnownRemoteModifiedTime = remoteModifiedTime;
                 _lastSyncTime = DateTimeOffset.UtcNow;
-                
+
                 var storageKey = LastSyncStorageKeyPrefix + _activeProviderName;
                 await _storage.SetItemAsync(storageKey, _lastSyncTime.Value.ToString("O"));
-                
+
                 UpdateStatus(AutoSyncStatus.Success);
                 Console.WriteLine($"Auto-sync ({_activeProviderName}): Data restored successfully.");
             }
@@ -265,30 +261,6 @@ public class AutoSyncService : IAutoSyncService
         catch
         {
             // Ignore errors loading last sync time
-        }
-    }
-
-    /// <summary>
-    /// Tries to restore auto-sync state from storage.
-    /// Should be called on initialization.
-    /// </summary>
-    public async Task TryRestoreStateAsync()
-    {
-        try
-        {
-            var providerName = await _storage.GetItemAsync(EnabledProviderStorageKey);
-            if (!string.IsNullOrEmpty(providerName))
-            {
-                var provider = ResolveProvider(providerName);
-                if (provider != null && await provider.IsAuthenticatedAsync())
-                {
-                    await EnableAsync(providerName);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to restore auto-sync state: {ex.Message}");
         }
     }
 

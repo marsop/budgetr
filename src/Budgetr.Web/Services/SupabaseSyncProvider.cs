@@ -8,12 +8,8 @@ namespace Budgetr.Web.Services;
 public class SupabaseSyncProvider : ISyncProvider
 {
     private readonly SupabaseService _supabaseService;
-    
+
     public string Name => "Supabase";
-    public string Description => "Sync your data with Supabase";
-    public string Icon => "🗄️";
-    
-    public bool IsConfigured => !string.IsNullOrEmpty(_supabaseService.GetConfiguredUrl());
 
     public SupabaseSyncProvider(SupabaseService supabaseService)
     {
@@ -24,19 +20,6 @@ public class SupabaseSyncProvider : ISyncProvider
     {
         await _supabaseService.TryAutoInitializeAsync();
         return await _supabaseService.IsSignedInAsync();
-    }
-
-    public async Task<bool> AuthenticateAsync()
-    {
-        // Authentication for Supabase requires email/password,
-        // which is handled directly by the Settings UI.
-        // This method checks if already authenticated.
-        return await _supabaseService.IsSignedInAsync();
-    }
-
-    public async Task SignOutAsync()
-    {
-        await _supabaseService.SignOutAsync();
     }
 
     public async Task<string?> DownloadDataAsync()
