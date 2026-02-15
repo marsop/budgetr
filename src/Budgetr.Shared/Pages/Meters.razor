@@ -10,8 +10,12 @@
     <h2 class="page-title">@Localizer["NavMeters"]</h2>
     
     <div class="meters-grid">
-        @foreach (var meter in TimeService.Account.Meters.OrderBy(m => m.DisplayOrder))
+        @{
+            var orderedMeters = TimeService.Account.Meters.OrderBy(m => m.DisplayOrder).ToList();
+        }
+        @for (var index = 0; index < orderedMeters.Count; index++)
         {
+            var meter = orderedMeters[index];
             var isActive = IsActiveMeter(meter.Id);
             var isEditing = _editingMeterId == meter.Id;
             var isDragging = _draggedMeter?.Id == meter.Id;
@@ -54,6 +58,7 @@
                 {
                     <button class="meter-button @(isActive ? "active" : "") @(meter.Factor >= 0 ? "positive" : "negative")"
                             @onclick="() => ToggleMeter(meter.Id)">
+                        <div class="meter-index">#@(index + 1)</div>
                         <div class="meter-name">@meter.Name</div>
                         <div class="meter-factor">@Localizer["MeterFactor", meter.Factor.ToString("0.##")]</div>
                         <div class="meter-status">
