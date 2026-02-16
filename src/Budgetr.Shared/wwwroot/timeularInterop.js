@@ -1,7 +1,22 @@
 // Timeular device JavaScript interop for Budgetr
 window.timeularInterop = {
+    ORIENTATION_SERVICE_UUID: "c7e70010-c847-11e6-8175-8c89a55d403c",
+    ORIENTATION_CHARACTERISTIC_UUID: "c7e70012-c847-11e6-8175-8c89a55d403c",
+
     _device: null,
+    _server: null,
+    _orientationCharacteristic: null,
+    _orientationHandler: null,
+    _dotNetRef: null,
     STORAGE_KEY: "budgetr_timeular_state",
+
+    registerListener: function (dotNetRef) {
+        this._dotNetRef = dotNetRef;
+    },
+
+    unregisterListener: function () {
+        this._dotNetRef = null;
+    },
 
     requestAndConnect: async function () {
         if (!navigator.bluetooth) {
@@ -17,17 +32,26 @@ window.timeularInterop = {
                     { namePrefix: "Timeular" },
                     { namePrefix: "ZEI" }
                 ],
-                optionalServices: ["battery_service", "device_information"]
+                optionalServices: [
+                    this.ORIENTATION_SERVICE_UUID,
+                    "battery_service",
+                    "device_information"
+                ]
             });
 
             this._device = device;
 
             if (device.gatt && !device.gatt.connected) {
-                await device.gatt.connect();
+                this._server = await device.gatt.connect();
+            } else {
+                this._server = device.gatt;
             }
 
             const deviceName = device.name || "Timeular Device";
             const deviceId = device.id || null;
+
+            await this._subscribeToOrientationChanges();
+            this._attachDisconnectHandler();
 
             this.saveState(deviceName, deviceId);
 
@@ -51,10 +75,67 @@ window.timeularInterop = {
         }
     },
 
+    _subscribeToOrientationChanges: async function () {
+        if (!this._server) {
+            throw new Error("GATT server is not connected.");
+        }
+
+        const service = await this._server.getPrimaryService(this.ORIENTATION_SERVICE_UUID);
+        const characteristic = await service.getCharacteristic(this.ORIENTATION_CHARACTERISTIC_UUID);
+
+        this._orientationCharacteristic = characteristic;
+        await characteristic.startNotifications();
+
+        this._orientationHandler = (event) => {
+            const value = event?.target?.value;
+            if (!value) {
+                return;
+            }
+
+            const bytes = Array.from(new Uint8Array(value.buffer));
+            const hex = bytes.map(b => b.toString(16).padStart(2, "0")).join(" ");
+            const face = bytes.length > 0 ? bytes[0] : null;
+
+            if (this._dotNetRef) {
+                this._dotNetRef.invokeMethodAsync("OnTimeularChange", {
+                    eventType: "orientation",
+                    face: face,
+                    rawHex: hex,
+                    timestampUtc: new Date().toISOString()
+                });
+            }
+        };
+
+        characteristic.addEventListener("characteristicvaluechanged", this._orientationHandler);
+    },
+
+    _attachDisconnectHandler: function () {
+        if (!this._device) {
+            return;
+        }
+
+        this._device.addEventListener("gattserverdisconnected", () => {
+            if (this._dotNetRef) {
+                this._dotNetRef.invokeMethodAsync("OnTimeularChange", {
+                    eventType: "disconnected",
+                    timestampUtc: new Date().toISOString()
+                });
+            }
+        });
+    },
+
     disconnect: function () {
+        if (this._orientationCharacteristic && this._orientationHandler) {
+            this._orientationCharacteristic.removeEventListener("characteristicvaluechanged", this._orientationHandler);
+        }
+
         if (this._device && this._device.gatt && this._device.gatt.connected) {
             this._device.gatt.disconnect();
         }
+
+        this._orientationCharacteristic = null;
+        this._orientationHandler = null;
+        this._server = null;
     },
 
     saveState: function (deviceName, deviceId) {

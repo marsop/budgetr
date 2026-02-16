@@ -1426,6 +1426,48 @@ body {
     background: var(--color-bg-primary);
 }
 
+.timeular-log {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.timeular-log-title {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+}
+
+.timeular-log-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin: 0;
+    padding: 0;
+}
+
+.timeular-log-item {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: baseline;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.timeular-log-time {
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    min-width: 4.5rem;
+}
+
+.timeular-log-text {
+    color: var(--color-text-primary);
+    word-break: break-word;
+}
+
 /* ===== Meter Edit/Rename ===== */
 
 .meter-container {

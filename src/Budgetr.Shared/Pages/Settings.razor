@@ -94,6 +94,22 @@
                 @timeularStatusMessage
             </div>
         }
+
+        @if (timeularChangeLog.Count > 0)
+        {
+            <div class="timeular-log">
+                <div class="timeular-log-title">Recent device changes</div>
+                <ul class="timeular-log-list">
+                    @foreach (var entry in timeularChangeLog)
+                    {
+                        <li class="timeular-log-item">
+                            <span class="timeular-log-time">@entry.At.ToLocalTime().ToString("HH:mm:ss")</span>
+                            <span class="timeular-log-text">@entry.Message</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
     </div>
 
     <!-- Data Management Section -->
@@ -362,6 +378,8 @@
     private string? timeularDeviceName;
     private string? timeularStatusMessage;
     private string timeularStatusClass = "";
+    private readonly List<TimeularLogEntry> timeularChangeLog = new();
+    private DotNetObjectReference<Settings>? timeularInteropRef;
 
     // ===== Sync (Import/Export) State =====
     private ElementReference fileInput;
@@ -439,6 +457,9 @@
         {
             // Subscribe to auto-sync status changes
             AutoSyncService.OnStatusChanged += OnAutoSyncStatusChanged;
+
+            timeularInteropRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("timeularInterop.registerListener", timeularInteropRef);
             
             await LoadTimeularStateAsync();
             await TryInitializeSupabase();
@@ -450,6 +471,9 @@
         SettingsService.OnSettingsChanged -= StateHasChanged;
         TutorialService.OnChange -= StateHasChanged;
         AutoSyncService.OnStatusChanged -= OnAutoSyncStatusChanged;
+
+        _ = JSRuntime.InvokeVoidAsync("timeularInterop.unregisterListener");
+        timeularInteropRef?.Dispose();
     }
 
     // ===== Settings Methods =====
@@ -492,6 +516,7 @@
             {
                 timeularDeviceName = savedState.DeviceName;
                 isTimeularConnected = false;
+                AddTimeularChange($"Known device: {timeularDeviceName ?? "Timeular"}");
             }
         }
         catch
@@ -515,12 +540,14 @@
                 timeularDeviceName = result.DeviceName;
                 timeularStatusMessage = $"Connected to {result.DeviceName}.";
                 timeularStatusClass = "success";
+                AddTimeularChange($"Connected to {result.DeviceName ?? "Timeular"}");
             }
             else
             {
                 isTimeularConnected = false;
                 timeularStatusMessage = result.Message ?? "Could not connect to the Timeular device.";
                 timeularStatusClass = "error";
+                AddTimeularChange(timeularStatusMessage);
             }
         }
         catch (Exception ex)
@@ -528,6 +555,7 @@
             isTimeularConnected = false;
             timeularStatusMessage = $"Could not connect to Timeular: {ex.Message}";
             timeularStatusClass = "error";
+            AddTimeularChange(timeularStatusMessage);
         }
         finally
         {
@@ -544,14 +572,55 @@
             isTimeularConnected = false;
             timeularStatusMessage = "Timeular disconnected.";
             timeularStatusClass = "success";
+            AddTimeularChange("Disconnected from Timeular");
         }
         catch (Exception ex)
         {
             timeularStatusMessage = $"Could not disconnect from Timeular: {ex.Message}";
             timeularStatusClass = "error";
+            AddTimeularChange(timeularStatusMessage);
         }
 
         StateHasChanged();
+    }
+
+    [JSInvokable]
+    public Task OnTimeularChange(TimeularChangeEvent change)
+    {
+        if (change.EventType == "disconnected")
+        {
+            isTimeularConnected = false;
+            timeularStatusMessage = "Timeular disconnected.";
+            timeularStatusClass = "error";
+            AddTimeularChange("Device disconnected");
+        }
+        else if (change.EventType == "orientation")
+        {
+            var faceLabel = change.Face.HasValue ? $"Face {change.Face.Value}" : "Face ?";
+            var rawLabel = string.IsNullOrWhiteSpace(change.RawHex) ? "" : $" ({change.RawHex})";
+            AddTimeularChange($"{faceLabel}{rawLabel}", change.TimestampUtc);
+        }
+        else
+        {
+            AddTimeularChange("Received a device event", change.TimestampUtc);
+        }
+
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private void AddTimeularChange(string message, string? timestampUtc = null)
+    {
+        var timestamp = DateTimeOffset.UtcNow;
+        if (!string.IsNullOrWhiteSpace(timestampUtc) && DateTimeOffset.TryParse(timestampUtc, out var parsed))
+        {
+            timestamp = parsed;
+        }
+
+        timeularChangeLog.Insert(0, new TimeularLogEntry(timestamp, message));
+        if (timeularChangeLog.Count > 4)
+        {
+            timeularChangeLog.RemoveRange(4, timeularChangeLog.Count - 4);
+        }
     }
 
     // ===== Data Management - Local Methods =====
@@ -1025,4 +1094,14 @@
         public string? DeviceId { get; set; }
         public string? Message { get; set; }
     }
+
+    public sealed class TimeularChangeEvent
+    {
+        public string? EventType { get; set; }
+        public int? Face { get; set; }
+        public string? RawHex { get; set; }
+        public string? TimestampUtc { get; set; }
+    }
+
+    private sealed record TimeularLogEntry(DateTimeOffset At, string Message);
 }
