@@ -60,6 +60,42 @@
         </div>
     </div>
 
+    <!-- Timeular Section -->
+    <div class="settings-section">
+        <h2 class="section-title">🧊 Timeular</h2>
+        <p class="setting-description">Connect your Timeular device from here. Functional mapping will be configured later.</p>
+
+        @if (!string.IsNullOrWhiteSpace(timeularDeviceName))
+        {
+            <div class="timeular-device-info">
+                <span class="info-icon">📶</span>
+                <span>Selected device: @timeularDeviceName</span>
+            </div>
+        }
+
+        <div class="timeular-actions">
+            <button class="sync-button timeular-connect-btn" @onclick="ConnectTimeularDevice" disabled="@isConnectingTimeular">
+                <span class="btn-icon">🔗</span>
+                <span>@(isConnectingTimeular ? "Connecting..." : (isTimeularConnected ? "Reconnect Timeular" : "Connect Timeular"))</span>
+            </button>
+
+            @if (isTimeularConnected)
+            {
+                <button class="sync-button timeular-disconnect-btn" @onclick="DisconnectTimeularDevice">
+                    <span class="btn-icon">🔌</span>
+                    <span>Disconnect</span>
+                </button>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(timeularStatusMessage))
+        {
+            <div class="status-message @timeularStatusClass">
+                @timeularStatusMessage
+            </div>
+        }
+    </div>
+
     <!-- Data Management Section -->
     <div class="settings-section">
         <h2 class="section-title">📦 Data Management</h2>
@@ -287,6 +323,13 @@
     private bool isDropdownOpen = false;
     private bool isAvatarDropdownOpen = false;
 
+    // ===== Timeular State =====
+    private bool isConnectingTimeular;
+    private bool isTimeularConnected;
+    private string? timeularDeviceName;
+    private string? timeularStatusMessage;
+    private string timeularStatusClass = "";
+
     // ===== Sync (Import/Export) State =====
     private ElementReference fileInput;
     private string? selectedFileName;
@@ -357,6 +400,8 @@
             // Subscribe to auto-sync status changes
             AutoSyncService.OnStatusChanged += OnAutoSyncStatusChanged;
             
+            await LoadTimeularStateAsync();
+
             // Try to auto-initialize Google Drive if previously configured
             await TryInitializeGoogleDrive();
         }
@@ -397,6 +442,78 @@
     {
         await TutorialService.SetAvatarAsync(avatarId);
         isAvatarDropdownOpen = false;
+    }
+
+    // ===== Timeular Methods =====
+    private async Task LoadTimeularStateAsync()
+    {
+        try
+        {
+            var savedState = await JSRuntime.InvokeAsync<TimeularSavedState?>("timeularInterop.getSavedState");
+            if (savedState is not null)
+            {
+                timeularDeviceName = savedState.DeviceName;
+                isTimeularConnected = false;
+            }
+        }
+        catch
+        {
+            // Ignore state restoration errors to avoid blocking settings page
+        }
+    }
+
+    private async Task ConnectTimeularDevice()
+    {
+        isConnectingTimeular = true;
+        timeularStatusMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var result = await JSRuntime.InvokeAsync<TimeularConnectResult>("timeularInterop.requestAndConnect");
+            if (result.Success)
+            {
+                isTimeularConnected = true;
+                timeularDeviceName = result.DeviceName;
+                timeularStatusMessage = $"Connected to {result.DeviceName}.";
+                timeularStatusClass = "success";
+            }
+            else
+            {
+                isTimeularConnected = false;
+                timeularStatusMessage = result.Message ?? "Could not connect to the Timeular device.";
+                timeularStatusClass = "error";
+            }
+        }
+        catch (Exception ex)
+        {
+            isTimeularConnected = false;
+            timeularStatusMessage = $"Could not connect to Timeular: {ex.Message}";
+            timeularStatusClass = "error";
+        }
+        finally
+        {
+            isConnectingTimeular = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DisconnectTimeularDevice()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("timeularInterop.disconnect");
+            isTimeularConnected = false;
+            timeularStatusMessage = "Timeular disconnected.";
+            timeularStatusClass = "success";
+        }
+        catch (Exception ex)
+        {
+            timeularStatusMessage = $"Could not disconnect from Timeular: {ex.Message}";
+            timeularStatusClass = "error";
+        }
+
+        StateHasChanged();
     }
 
     // ===== Data Management - Local Methods =====
@@ -800,5 +917,20 @@
         {
             // Error handling can be added here if needed
         }
+    }
+
+    private sealed class TimeularSavedState
+    {
+        public string? DeviceName { get; set; }
+        public string? DeviceId { get; set; }
+        public string? ConnectedAtUtc { get; set; }
+    }
+
+    private sealed class TimeularConnectResult
+    {
+        public bool Success { get; set; }
+        public string? DeviceName { get; set; }
+        public string? DeviceId { get; set; }
+        public string? Message { get; set; }
     }
 }

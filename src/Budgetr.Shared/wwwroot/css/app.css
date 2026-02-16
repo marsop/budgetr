@@ -1293,6 +1293,45 @@ body {
     }
 }
 
+/* ===== Timeular Section ===== */
+
+.timeular-device-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.timeular-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.timeular-connect-btn {
+    background: #0ea5a8;
+    color: white;
+}
+
+.timeular-connect-btn:hover:not(:disabled) {
+    background: #0d8f91;
+    box-shadow: 0 0 20px rgba(14, 165, 168, 0.35);
+}
+
+.timeular-disconnect-btn {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.timeular-disconnect-btn:hover:not(:disabled) {
+    background: var(--color-bg-primary);
+}
+
 /* ===== Meter Edit/Rename ===== */
 
 .meter-container {
