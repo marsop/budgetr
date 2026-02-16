@@ -11,10 +11,17 @@ public interface IAutoSyncService : IDisposable
     bool IsEnabled { get; }
     
     /// <summary>
-    /// Enables auto-sync. The service will subscribe to data changes
-    /// and automatically backup to the configured cloud provider.
+    /// The name of the currently active sync provider (e.g. "GoogleDrive", "Supabase"), or null if disabled.
     /// </summary>
-    Task EnableAsync();
+    string? ActiveProviderName { get; }
+    
+    /// <summary>
+    /// Enables auto-sync with the specified provider. The service will subscribe to data changes
+    /// and automatically backup to the specified cloud provider.
+    /// If another provider is already active, it will be disabled first.
+    /// </summary>
+    /// <param name="providerName">Name of the sync provider to use.</param>
+    Task EnableAsync(string providerName);
     
     /// <summary>
     /// Disables auto-sync.

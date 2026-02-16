@@ -48,6 +48,16 @@ public interface ITimeTrackingService
     void DeleteEvent(Guid eventId);
     
     /// <summary>
+    /// Updates the start and end times of a non-active event.
+    /// </summary>
+    /// <param name="eventId">The ID of the event to update.</param>
+    /// <param name="newStartTime">The new start time.</param>
+    /// <param name="newEndTime">The new end time.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the event is active.</exception>
+    /// <exception cref="ArgumentException">Thrown when newStartTime >= newEndTime or newEndTime is in the future.</exception>
+    void UpdateEventTimes(Guid eventId, DateTimeOffset newStartTime, DateTimeOffset newEndTime);
+    
+    /// <summary>
     /// Saves the current state to persistent storage.
     /// </summary>
     Task SaveAsync();

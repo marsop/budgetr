@@ -1,5 +1,4 @@
 using Budgetr.Shared.Services;
-using Microsoft.JSInterop;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
@@ -7,20 +6,20 @@ namespace Budgetr.Web.Services;
 
 /// <summary>
 /// Auto-sync service implementation using Rx.NET for change detection and debouncing.
-/// Automatically backs up data to Google Drive when changes are detected.
+/// Automatically backs up data to the active sync provider when changes are detected.
+/// Supports multiple providers (Google Drive, Supabase, etc.) via ISyncProvider.
 /// </summary>
 public class AutoSyncService : IAutoSyncService
 {
     private readonly ITimeTrackingService _timeService;
-    private readonly GoogleDriveService _driveService;
     private readonly IStorageService _storage;
-    private readonly IJSRuntime _js;
-    
-    private const string EnabledStorageKey = "budgetr_autosync_enabled";
-    private const string LastSyncStorageKey = "budgetr_autosync_lastsync";
+    private readonly IServiceProvider _serviceProvider;
+
+    private const string EnabledProviderStorageKey = "budgetr_autosync_provider";
+    private const string LastSyncStorageKeyPrefix = "budgetr_autosync_lastsync_";
     private const int DebounceMilliseconds = 1000;
     private const int PollingIntervalSeconds = 30;
-    
+
     private readonly Subject<bool> _changeSubject = new();
     private IDisposable? _subscription;
     private IDisposable? _pollingSubscription;
@@ -29,26 +28,34 @@ public class AutoSyncService : IAutoSyncService
     private DateTimeOffset? _lastSyncTime;
     private DateTimeOffset? _lastKnownRemoteModifiedTime;
     private AutoSyncStatus _status = AutoSyncStatus.Idle;
-    
+
+    private ISyncProvider? _activeProvider;
+    private string? _activeProviderName;
+
     public bool IsEnabled => _isEnabled;
+    public string? ActiveProviderName => _activeProviderName;
     public DateTimeOffset? LastSyncTime => _lastSyncTime;
     public AutoSyncStatus Status => _status;
-    
+
     public event Action<AutoSyncStatus>? OnStatusChanged;
 
     public AutoSyncService(
         ITimeTrackingService timeService,
-        GoogleDriveService driveService,
         IStorageService storage,
-        IJSRuntime js)
+        IServiceProvider serviceProvider)
     {
         _timeService = timeService;
-        _driveService = driveService;
         _storage = storage;
-        _js = js;
-        
+        _serviceProvider = serviceProvider;
+
         // Subscribe to time service state changes and push to reactive stream
         _timeService.OnStateChanged += OnDataChanged;
+    }
+
+    private ISyncProvider? ResolveProvider(string providerName)
+    {
+        var providers = _serviceProvider.GetServices<ISyncProvider>();
+        return providers?.FirstOrDefault(p => p.Name == providerName);
     }
 
     private void OnDataChanged()
@@ -60,27 +67,39 @@ public class AutoSyncService : IAutoSyncService
         }
     }
 
-    public async Task EnableAsync()
+    public async Task EnableAsync(string providerName)
     {
-        if (_isEnabled)
+        // If already enabled on a different provider, disable first
+        if (_isEnabled && _activeProviderName != providerName)
+        {
+            await DisableAsync();
+        }
+
+        if (_isEnabled && _activeProviderName == providerName)
             return;
-        
-        // Ensure GoogleDriveService is initialized (in case Sync.razor used direct JS interop)
-        await _driveService.TryAutoInitializeAsync();
-            
-        // Check if Google Drive is signed in
-        var isSignedIn = await _driveService.IsSignedInAsync();
+
+        // Resolve the provider
+        var provider = ResolveProvider(providerName);
+        if (provider == null)
+        {
+            throw new InvalidOperationException($"Sync provider '{providerName}' not found.");
+        }
+
+        // Check if the provider is authenticated
+        var isSignedIn = await provider.IsAuthenticatedAsync();
         if (!isSignedIn)
         {
-            throw new InvalidOperationException("Please sign in to Google Drive first.");
+            throw new InvalidOperationException($"Please sign in to {providerName} first.");
         }
-        
+
+        _activeProvider = provider;
+        _activeProviderName = providerName;
         _isEnabled = true;
-        await _storage.SetItemAsync(EnabledStorageKey, "true");
-        
-        // Load last sync time
+        await _storage.SetItemAsync(EnabledProviderStorageKey, providerName);
+
+        // Load last sync time for this provider
         await LoadLastSyncTimeAsync();
-        
+
         // Initialize last known remote time to avoid immediate restore loop if we just synced
         if (_lastSyncTime.HasValue)
         {
@@ -88,19 +107,19 @@ public class AutoSyncService : IAutoSyncService
         }
         else
         {
-             // If we have never synced, try to get the current remote time so we only restore *new* changes
-             _lastKnownRemoteModifiedTime = await _driveService.GetBackupLastModifiedAsync();
+            // If we have never synced, try to get the current remote time so we only restore *new* changes
+            _lastKnownRemoteModifiedTime = await _activeProvider.GetLastBackupTimeAsync();
         }
 
         // Set up debounced subscription using Rx.NET
         _subscription = _changeSubject
             .Throttle(TimeSpan.FromMilliseconds(DebounceMilliseconds))
             .Subscribe(async _ => await PerformSyncAsync());
-            
+
         // Set up polling for remote changes
         _pollingSubscription = Observable.Interval(TimeSpan.FromSeconds(PollingIntervalSeconds))
             .Subscribe(async _ => await CheckForRemoteChangesAsync());
-        
+
         UpdateStatus(AutoSyncStatus.Idle);
     }
 
@@ -108,116 +127,118 @@ public class AutoSyncService : IAutoSyncService
     {
         if (!_isEnabled)
             return;
-            
+
         _isEnabled = false;
-        await _storage.SetItemAsync(EnabledStorageKey, "false");
-        
+        _activeProvider = null;
+        _activeProviderName = null;
+        await _storage.SetItemAsync(EnabledProviderStorageKey, "");
+
         // Dispose subscriptions
         _subscription?.Dispose();
         _subscription = null;
-        
+
         _pollingSubscription?.Dispose();
         _pollingSubscription = null;
-        
+
         UpdateStatus(AutoSyncStatus.Idle);
     }
 
     private async Task PerformSyncAsync()
     {
-        if (!_isEnabled || _isRestoring)
+        if (!_isEnabled || _isRestoring || _activeProvider == null)
             return;
-            
+
         try
         {
             UpdateStatus(AutoSyncStatus.Syncing);
-            
-            // Ensure service is initialized
-            await _driveService.TryAutoInitializeAsync();
-            
+
             // Check if still signed in
-            var isSignedIn = await _driveService.IsSignedInAsync();
+            var isSignedIn = await _activeProvider.IsAuthenticatedAsync();
             if (!isSignedIn)
             {
-                Console.WriteLine("Auto-sync: Not signed in, disabling auto-sync.");
+                Console.WriteLine($"Auto-sync: Not signed in to {_activeProviderName}, disabling auto-sync.");
                 await DisableAsync();
                 UpdateStatus(AutoSyncStatus.Failed);
                 return;
             }
-            
+
             // Export and upload data
             var json = _timeService.ExportData();
-            var modifiedTime = await _driveService.SaveBackupAsync(json);
-            
-            // Update last sync time and remote modified time
+            await _activeProvider.UploadDataAsync(json);
+
+            // Update last sync time
             _lastSyncTime = DateTimeOffset.UtcNow;
+            var modifiedTime = await _activeProvider.GetLastBackupTimeAsync();
             if (modifiedTime.HasValue)
             {
                 _lastKnownRemoteModifiedTime = modifiedTime;
             }
-            
-            await _storage.SetItemAsync(LastSyncStorageKey, _lastSyncTime.Value.ToString("O"));
-            
+
+            var storageKey = LastSyncStorageKeyPrefix + _activeProviderName;
+            await _storage.SetItemAsync(storageKey, _lastSyncTime.Value.ToString("O"));
+
             UpdateStatus(AutoSyncStatus.Success);
-            Console.WriteLine($"Auto-sync: Backup completed at {_lastSyncTime}");
+            Console.WriteLine($"Auto-sync ({_activeProviderName}): Backup completed at {_lastSyncTime}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Auto-sync failed: {ex.Message}");
+            Console.WriteLine($"Auto-sync ({_activeProviderName}) failed: {ex.Message}");
             UpdateStatus(AutoSyncStatus.Failed);
         }
     }
-    
+
     private async Task CheckForRemoteChangesAsync()
     {
-        if (!_isEnabled || _isRestoring)
+        if (!_isEnabled || _isRestoring || _activeProvider == null)
             return;
-            
+
         try
         {
-            // Ensure service is initialized
-            await _driveService.TryAutoInitializeAsync();
-            
-            if (!await _driveService.IsSignedInAsync())
+            if (!await _activeProvider.IsAuthenticatedAsync())
                 return;
 
-            var remoteModified = await _driveService.GetBackupLastModifiedAsync();
-            
+            var remoteModified = await _activeProvider.GetLastBackupTimeAsync();
+
             // If remote file exists and is newer than what we last knew about
-            if (remoteModified.HasValue && 
+            if (remoteModified.HasValue &&
                 (!_lastKnownRemoteModifiedTime.HasValue || remoteModified.Value > _lastKnownRemoteModifiedTime.Value + TimeSpan.FromSeconds(1)))
             {
-                Console.WriteLine($"Auto-sync: Detected remote change. Local: {_lastKnownRemoteModifiedTime}, Remote: {remoteModified}");
+                Console.WriteLine($"Auto-sync ({_activeProviderName}): Detected remote change. Local: {_lastKnownRemoteModifiedTime}, Remote: {remoteModified}");
                 await RestoreDataAsync(remoteModified.Value);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Auto-sync polling failed: {ex.Message}");
+            Console.WriteLine($"Auto-sync ({_activeProviderName}) polling failed: {ex.Message}");
         }
     }
-    
+
     private async Task RestoreDataAsync(DateTimeOffset remoteModifiedTime)
     {
+        if (_activeProvider == null) return;
+
         try
         {
             _isRestoring = true;
             UpdateStatus(AutoSyncStatus.Syncing);
-            
-            var content = await _driveService.GetLatestBackupContentAsync();
+
+            var content = await _activeProvider.DownloadDataAsync();
             if (!string.IsNullOrEmpty(content))
             {
                 await _timeService.ImportDataAsync(content);
                 _lastKnownRemoteModifiedTime = remoteModifiedTime;
                 _lastSyncTime = DateTimeOffset.UtcNow;
-                await _storage.SetItemAsync(LastSyncStorageKey, _lastSyncTime.Value.ToString("O"));
-                
+
+                var storageKey = LastSyncStorageKeyPrefix + _activeProviderName;
+                await _storage.SetItemAsync(storageKey, _lastSyncTime.Value.ToString("O"));
+
                 UpdateStatus(AutoSyncStatus.Success);
-                Console.WriteLine("Auto-sync: Data restored from Google Drive successfully.");
+                Console.WriteLine($"Auto-sync ({_activeProviderName}): Data restored successfully.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Auto-sync restore failed: {ex.Message}");
+            Console.WriteLine($"Auto-sync ({_activeProviderName}) restore failed: {ex.Message}");
             UpdateStatus(AutoSyncStatus.Failed);
         }
         finally
@@ -230,7 +251,8 @@ public class AutoSyncService : IAutoSyncService
     {
         try
         {
-            var lastSyncStr = await _storage.GetItemAsync(LastSyncStorageKey);
+            var storageKey = LastSyncStorageKeyPrefix + _activeProviderName;
+            var lastSyncStr = await _storage.GetItemAsync(storageKey);
             if (!string.IsNullOrEmpty(lastSyncStr) && DateTimeOffset.TryParse(lastSyncStr, out var parsed))
             {
                 _lastSyncTime = parsed;
@@ -239,31 +261,6 @@ public class AutoSyncService : IAutoSyncService
         catch
         {
             // Ignore errors loading last sync time
-        }
-    }
-
-    /// <summary>
-    /// Tries to restore auto-sync state from storage.
-    /// Should be called on initialization.
-    /// </summary>
-    public async Task TryRestoreStateAsync()
-    {
-        try
-        {
-            var enabled = await _storage.GetItemAsync(EnabledStorageKey);
-            if (enabled == "true")
-            {
-                // Check if Google Drive is still signed in
-                var isSignedIn = await _driveService.IsSignedInAsync();
-                if (isSignedIn)
-                {
-                    await EnableAsync();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to restore auto-sync state: {ex.Message}");
         }
     }
 

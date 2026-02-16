@@ -11,93 +11,81 @@
     
     <div class="meters-grid">
         @{
-            var metersList = GetDisplayOrder();
+            var orderedMeters = TimeService.Account.Meters.OrderBy(m => m.DisplayOrder).ToList();
         }
-
-        @foreach (var meter in metersList)
+        @for (var index = 0; index < orderedMeters.Count; index++)
         {
+            var meter = orderedMeters[index];
             var isActive = IsActiveMeter(meter.Id);
             var isEditing = _editingMeterId == meter.Id;
-            var isDraggedItem = _draggedMeter?.Id == meter.Id;
-            var showAsPlaceholder = isDraggedItem && _dragTargetMeterId.HasValue && _dragTargetMeterId.Value != meter.Id;
+            var isDragging = _draggedMeter?.Id == meter.Id;
+            var isDragOver = _dragTargetMeterId.HasValue && _dragTargetMeterId.Value == meter.Id && _draggedMeter?.Id != meter.Id;
 
-            @if (showAsPlaceholder)
-            {
-                <!-- This is where the dragged item will land -->
-                <div class="meter-drop-preview"
-                     @ondragenter="() => HandleDragEnter(meter)"
-                     @ondragover="HandleDragOver"
-                     @ondragover:preventDefault
-                     @ondrop="() => HandleDrop(meter)">
-                    <div class="drop-preview-label">@meter.Name</div>
-                </div>
-            }
-            else
-            {
-                <div draggable="@(isEditing ? "false" : "true")"
-                     class="meter-container @(isDraggedItem && _dragTargetMeterId.HasValue ? "dragging" : "")"
-                     @ondragstart="() => HandleDragStart(meter)"
-                     @ondrop="() => HandleDrop(meter)"
-                     @ondragenter="() => HandleDragEnter(meter)"
-                     @ondragend="HandleDragEnd"
-                     @ondragover="HandleDragOver"
-                     @ondragover:preventDefault>
-                    @if (isEditing)
-                    {
-                        <div class="meter-edit-form">
-                            <input type="text" 
-                                   class="meter-name-input @(_validationError != null ? "invalid" : "")"
-                                   @bind="_editingMeterName"
-                                   @bind:event="oninput"
-                                   @onkeydown="HandleEditKeyDown"
-                                   @onblur="SaveEdit"
-                                   maxlength="40"
-                                   autofocus />
-                            <div class="edit-actions">
-                                <button class="edit-action-btn save" @onclick="SaveEdit" title="@Localizer["Save"]">✓</button>
-                                <button class="edit-action-btn cancel" @onclick="CancelEdit" @onclick:stopPropagation="true" title="@Localizer["Cancel"]">✕</button>
-                            </div>
-                            @if (_validationError != null)
-                            {
-                                <div class="validation-error">@_validationError</div>
-                            }
-                            <div class="char-count @(_editingMeterName?.Length > 40 ? "over-limit" : "")">
-                                @(_editingMeterName?.Length ?? 0)/40
-                            </div>
+            <div draggable="@(isEditing ? "false" : "true")"
+                 class="meter-container @(isDragging ? "dragging" : "") @(isDragOver ? "drag-over" : "")"
+                 @ondragstart="() => HandleDragStart(meter)"
+                 @ondragenter="() => HandleDragEnter(meter)"
+                 @ondragover="HandleDragOver"
+                 @ondragover:preventDefault
+                 @ondrop="() => HandleDrop(meter)"
+                 @ondragend="HandleDragEnd"
+                 @ondragleave="HandleDragLeave">
+                @if (isEditing)
+                {
+                    <div class="meter-edit-form">
+                        <input type="text" 
+                               class="meter-name-input @(_validationError != null ? "invalid" : "")"
+                               @bind="_editingMeterName"
+                               @bind:event="oninput"
+                               @onkeydown="HandleEditKeyDown"
+                               @onblur="SaveEdit"
+                               maxlength="40"
+                               autofocus />
+                        <div class="edit-actions">
+                            <button class="edit-action-btn save" @onclick="SaveEdit" title="@Localizer["Save"]">✓</button>
+                            <button class="edit-action-btn cancel" @onclick="CancelEdit" @onclick:stopPropagation="true" title="@Localizer["Cancel"]">✕</button>
                         </div>
-                    }
-                    else
-                    {
-                        <button class="meter-button @(isActive ? "active" : "") @(meter.Factor >= 0 ? "positive" : "negative")"
-                                @onclick="() => ToggleMeter(meter.Id)">
-                            <div class="meter-name">@meter.Name</div>
-                            <div class="meter-factor">@Localizer["MeterFactor", meter.Factor.ToString("0.##")]</div>
-                            <div class="meter-status">
-                                @if (isActive)
-                                {
-                                    <span class="pulse"></span>
-                                    <span>@Localizer["Running"]</span>
-                                }
-                                else
-                                {
-                                    <span>@Localizer["TapToStart"]</span>
-                                }
-                            </div>
+                        @if (_validationError != null)
+                        {
+                            <div class="validation-error">@_validationError</div>
+                        }
+                        <div class="char-count @(_editingMeterName?.Length > 40 ? "over-limit" : "")">
+                            @(_editingMeterName?.Length ?? 0)/40
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <button class="meter-button @(isActive ? "active" : "") @(meter.Factor >= 0 ? "positive" : "negative")"
+                            @onclick="() => ToggleMeter(meter.Id)">
+                        <div class="meter-index">#@(index + 1)</div>
+                        <div class="meter-name">@meter.Name</div>
+                        <div class="meter-factor">@Localizer["MeterFactor", meter.Factor.ToString("0.##")]</div>
+                        <div class="meter-status">
+                            @if (isActive)
+                            {
+                                <span class="pulse"></span>
+                                <span>@Localizer["Running"]</span>
+                            }
+                            else
+                            {
+                                <span>@Localizer["TapToStart"]</span>
+                            }
+                        </div>
+                    </button>
+                    <div class="meter-actions">
+                        <button class="meter-action-btn" @onclick="() => StartEditing(meter)" @onclick:stopPropagation="true" title="@Localizer["RenameMeter"]">
+                            ✏️
                         </button>
-                        <div class="meter-actions">
-                            <button class="meter-action-btn" @onclick="() => StartEditing(meter)" @onclick:stopPropagation="true" title="@Localizer["RenameMeter"]">
-                                ✏️
+                        @if (!isActive)
+                        {
+                            <button class="meter-action-btn delete" @onclick="() => DeleteMeter(meter)" @onclick:stopPropagation="true" title="@Localizer["DeleteMeter"]">
+                                🗑️
                             </button>
-                            @if (!isActive)
-                            {
-                                <button class="meter-action-btn delete" @onclick="() => DeleteMeter(meter)" @onclick:stopPropagation="true" title="@Localizer["DeleteMeter"]">
-                                    🗑️
-                                </button>
-                            }
-                        </div>
-                    }
-                </div>
-            }
+                        }
+                    </div>
+                }
+            </div>
         }
         
         @if (TimeService.Account.Meters.Count < Budgetr.Shared.Services.TimeTrackingService.MaxMeters)
@@ -168,6 +156,10 @@
     private double _newMeterFactor = 1.0;
     private string? _addValidationError;
 
+    // Drag and Drop State
+    private Meter? _draggedMeter;
+    private Guid? _dragTargetMeterId;
+
     protected override void OnInitialized()
     {
         TimeService.OnStateChanged += StateHasChanged;
@@ -205,7 +197,6 @@
         _editingMeterId = meter.Id;
         _editingMeterName = meter.Name;
         _validationError = null;
-        // Cancel adding if active
         CancelAdd();
     }
 
@@ -284,7 +275,6 @@
         _newMeterName = string.Empty;
         _newMeterFactor = 1.0;
         _addValidationError = null;
-        // Cancel editing if active
         CancelEdit();
     }
 
@@ -314,43 +304,23 @@
         }
     }
 
-    private Meter? _draggedMeter;
-    private Guid? _dragTargetMeterId;
-
-    /// <summary>
-    /// Compute the display order: if a drag is active and target differs from source,
-    /// return the list as if the dragged item were removed from its original position
-    /// and inserted at the target position. Otherwise return the normal order.
-    /// </summary>
-    private List<Meter> GetDisplayOrder()
-    {
-        var meters = TimeService.Account.Meters.OrderBy(m => m.DisplayOrder).ToList();
-        
-        if (_draggedMeter == null || !_dragTargetMeterId.HasValue || _draggedMeter.Id == _dragTargetMeterId.Value)
-            return meters;
-
-        var draggedIndex = meters.FindIndex(m => m.Id == _draggedMeter.Id);
-        var targetIndex = meters.FindIndex(m => m.Id == _dragTargetMeterId.Value);
-
-        if (draggedIndex == -1 || targetIndex == -1)
-            return meters;
-
-        var dragged = meters[draggedIndex];
-        meters.RemoveAt(draggedIndex);
-        meters.Insert(targetIndex, dragged);
-        return meters;
-    }
+    // Drag and Drop Handlers
 
     private void HandleDragStart(Meter meter)
     {
         _draggedMeter = meter;
-        _dragTargetMeterId = null; // No target yet — item stays in place
+        _dragTargetMeterId = null;
     }
 
     private void HandleDragEnter(Meter meter)
     {
-        if (_draggedMeter == null) return;
+        if (_draggedMeter == null || _draggedMeter.Id == meter.Id) return;
         _dragTargetMeterId = meter.Id;
+    }
+
+    private void HandleDragLeave()
+    {
+        // No-op: we only clear on DragEnd or Drop to avoid flicker from child elements
     }
 
     private void HandleDragOver(DragEventArgs e)
@@ -373,11 +343,19 @@
             return;
         }
 
-        // Commit the preview order
-        var previewOrder = GetDisplayOrder();
-        var orderedIds = previewOrder.Select(m => m.Id).ToList();
-        TimeService.ReorderMeters(orderedIds);
-        
+        // Compute the reorder: remove dragged from original position, insert at target position
+        var meters = TimeService.Account.Meters.OrderBy(m => m.DisplayOrder).ToList();
+        var draggedIndex = meters.FindIndex(m => m.Id == _draggedMeter.Id);
+        var targetIndex = meters.FindIndex(m => m.Id == targetMeter.Id);
+
+        if (draggedIndex != -1 && targetIndex != -1)
+        {
+            var dragged = meters[draggedIndex];
+            meters.RemoveAt(draggedIndex);
+            meters.Insert(targetIndex, dragged);
+            TimeService.ReorderMeters(meters.Select(m => m.Id).ToList());
+        }
+
         _draggedMeter = null;
         _dragTargetMeterId = null;
     }
