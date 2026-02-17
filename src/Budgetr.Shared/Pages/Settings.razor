@@ -74,6 +74,17 @@
             </div>
         }
 
+        @if (TimeularService.HasConnectedBefore)
+        {
+            <div class="timeular-connection-indicator">
+                <span class="timeular-connection-light @(TimeularService.IsConnecting ? "connecting" : (TimeularService.IsConnected ? "connected" : "disconnected"))"></span>
+                <span>
+                    Tracker status:
+                    @(TimeularService.IsConnecting ? "Connecting..." : (TimeularService.IsConnected ? "Connected" : "Disconnected"))
+                </span>
+            </div>
+        }
+
         @if (!string.IsNullOrWhiteSpace(TimeularService.AutoReconnectMessage))
         {
             <div class="timeular-auto-reconnect-message @TimeularService.AutoReconnectClass">

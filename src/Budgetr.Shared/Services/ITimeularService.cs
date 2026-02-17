@@ -8,6 +8,7 @@ public interface ITimeularService
     bool IsInitialized { get; }
     bool IsConnecting { get; }
     bool IsConnected { get; }
+    bool HasConnectedBefore { get; }
     string? DeviceName { get; }
     string? StatusMessage { get; }
     string StatusClass { get; }

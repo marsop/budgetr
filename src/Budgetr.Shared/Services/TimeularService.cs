@@ -16,6 +16,7 @@ public sealed class TimeularService : ITimeularService, IDisposable
     public bool IsInitialized { get; private set; }
     public bool IsConnecting { get; private set; }
     public bool IsConnected { get; private set; }
+    public bool HasConnectedBefore { get; private set; }
     public string? DeviceName { get; private set; }
     public string? StatusMessage { get; private set; }
     public string StatusClass { get; private set; } = string.Empty;
@@ -60,6 +61,7 @@ public sealed class TimeularService : ITimeularService, IDisposable
             if (result.Success)
             {
                 IsConnected = true;
+                HasConnectedBefore = true;
                 DeviceName = result.DeviceName;
                 StatusMessage = $"Connected to {result.DeviceName}.";
                 StatusClass = "success";
@@ -149,6 +151,9 @@ public sealed class TimeularService : ITimeularService, IDisposable
             if (savedState is not null)
             {
                 DeviceName = savedState.DeviceName;
+                HasConnectedBefore = !string.IsNullOrWhiteSpace(savedState.DeviceId)
+                    || !string.IsNullOrWhiteSpace(savedState.DeviceName)
+                    || !string.IsNullOrWhiteSpace(savedState.ConnectedAtUtc);
                 IsConnected = false;
                 AddTimeularChange($"Known device: {DeviceName ?? "Timeular"}");
             }
@@ -172,6 +177,7 @@ public sealed class TimeularService : ITimeularService, IDisposable
             if (result.Success)
             {
                 IsConnected = true;
+                HasConnectedBefore = true;
                 DeviceName = result.DeviceName ?? DeviceName;
                 StatusMessage = $"Reconnected to {DeviceName ?? "Timeular"}.";
                 StatusClass = "success";

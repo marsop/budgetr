@@ -86,8 +86,16 @@ body {
 .main-content {
     flex: 1;
     overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
     padding: var(--spacing-lg);
     padding-bottom: calc(60px + var(--spacing-lg));
+}
+
+.main-content::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 @media (min-width: 480px) {
@@ -1399,6 +1407,40 @@ body {
     margin-bottom: var(--spacing-md);
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
+}
+
+.timeular-connection-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.timeular-connection-light {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+    flex-shrink: 0;
+}
+
+.timeular-connection-light.connected {
+    background: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.timeular-connection-light.connecting {
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+.timeular-connection-light.disconnected {
+    background: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
 }
 
 .timeular-auto-reconnect-message {
