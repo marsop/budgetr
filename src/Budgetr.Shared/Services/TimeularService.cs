@@ -19,6 +19,8 @@ public sealed class TimeularService : ITimeularService, IDisposable
     public string? DeviceName { get; private set; }
     public string? StatusMessage { get; private set; }
     public string StatusClass { get; private set; } = string.Empty;
+    public string? AutoReconnectMessage { get; private set; }
+    public string AutoReconnectClass { get; private set; } = string.Empty;
     public IReadOnlyList<TimeularLogEntry> ChangeLog => _changeLog;
 
     public event Action? OnStateChanged;
@@ -39,6 +41,7 @@ public sealed class TimeularService : ITimeularService, IDisposable
         _interopRef = DotNetObjectReference.Create(this);
         await _jsRuntime.InvokeVoidAsync("timeularInterop.registerListener", _interopRef);
         await LoadStateAsync();
+        await TryReconnectSavedDeviceAsync();
         IsInitialized = true;
         NotifyStateChanged();
     }
@@ -156,6 +159,41 @@ public sealed class TimeularService : ITimeularService, IDisposable
         }
     }
 
+    private async Task TryReconnectSavedDeviceAsync()
+    {
+        try
+        {
+            var result = await _jsRuntime.InvokeAsync<TimeularReconnectResult?>("timeularInterop.reconnectSavedDevice");
+            if (result is null)
+            {
+                return;
+            }
+
+            if (result.Success)
+            {
+                IsConnected = true;
+                DeviceName = result.DeviceName ?? DeviceName;
+                StatusMessage = $"Reconnected to {DeviceName ?? "Timeular"}.";
+                StatusClass = "success";
+                AutoReconnectMessage = $"Auto-reconnect succeeded: {DeviceName ?? "Timeular"} is connected.";
+                AutoReconnectClass = "success";
+                AddTimeularChange($"Reconnected to {DeviceName ?? "Timeular"}");
+                return;
+            }
+
+            var reason = string.IsNullOrWhiteSpace(result.Message) ? "No details were provided." : result.Message;
+            AutoReconnectClass = result.Attempted ? "error" : "info";
+            AutoReconnectMessage = result.Attempted
+                ? $"Auto-reconnect failed: {reason}"
+                : $"Auto-reconnect skipped: {reason}";
+        }
+        catch
+        {
+            AutoReconnectClass = "error";
+            AutoReconnectMessage = "Auto-reconnect failed due to an unexpected startup error.";
+        }
+    }
+
     private string ApplyTimeularFaceMapping(int? face)
     {
         var orderedMeters = _timeService.Account.Meters
@@ -229,6 +267,15 @@ public sealed class TimeularService : ITimeularService, IDisposable
         public string? Message { get; set; }
     }
 
+    public sealed class TimeularReconnectResult
+    {
+        public bool Attempted { get; set; }
+        public bool Success { get; set; }
+        public string? DeviceName { get; set; }
+        public string? DeviceId { get; set; }
+        public string? Message { get; set; }
+    }
+
     public sealed class TimeularChangeEvent
     {
         public string? EventType { get; set; }
@@ -237,4 +284,3 @@ public sealed class TimeularService : ITimeularService, IDisposable
         public string? TimestampUtc { get; set; }
     }
 }
-

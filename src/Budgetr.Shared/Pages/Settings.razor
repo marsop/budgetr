@@ -74,6 +74,13 @@
             </div>
         }
 
+        @if (!string.IsNullOrWhiteSpace(TimeularService.AutoReconnectMessage))
+        {
+            <div class="timeular-auto-reconnect-message @TimeularService.AutoReconnectClass">
+                @TimeularService.AutoReconnectMessage
+            </div>
+        }
+
         <div class="timeular-actions">
             <button class="sync-button timeular-connect-btn" @onclick="ConnectTimeularDevice" disabled="@TimeularService.IsConnecting">
                 <span class="btn-icon">🔗</span>

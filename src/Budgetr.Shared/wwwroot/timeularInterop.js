@@ -75,6 +75,65 @@ window.timeularInterop = {
         }
     },
 
+    reconnectSavedDevice: async function () {
+        if (!navigator.bluetooth || !navigator.bluetooth.getDevices) {
+            return {
+                attempted: false,
+                success: false,
+                message: "Auto-reconnect is not supported in this browser."
+            };
+        }
+
+        const saved = this.getSavedState();
+        if (!saved || !saved.deviceId) {
+            return {
+                attempted: false,
+                success: false,
+                message: "No previously connected Timeular device found."
+            };
+        }
+
+        try {
+            const devices = await navigator.bluetooth.getDevices();
+            const matched = devices.find(d => d && d.id === saved.deviceId);
+
+            if (!matched) {
+                return {
+                    attempted: true,
+                    success: false,
+                    message: "Previously connected Timeular device is not available."
+                };
+            }
+
+            this._device = matched;
+            if (matched.gatt && !matched.gatt.connected) {
+                this._server = await matched.gatt.connect();
+            } else {
+                this._server = matched.gatt;
+            }
+
+            const deviceName = matched.name || saved.deviceName || "Timeular Device";
+            const deviceId = matched.id || saved.deviceId || null;
+
+            await this._subscribeToOrientationChanges();
+            this._attachDisconnectHandler();
+            this.saveState(deviceName, deviceId);
+
+            return {
+                attempted: true,
+                success: true,
+                deviceName: deviceName,
+                deviceId: deviceId
+            };
+        } catch (error) {
+            return {
+                attempted: true,
+                success: false,
+                message: error?.message || "Unable to reconnect to saved Timeular device."
+            };
+        }
+    },
+
     _subscribeToOrientationChanges: async function () {
         if (!this._server) {
             throw new Error("GATT server is not connected.");

@@ -1401,6 +1401,28 @@ body {
     color: var(--color-text-muted);
 }
 
+.timeular-auto-reconnect-message {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
+
+.timeular-auto-reconnect-message.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-positive);
+}
+
+.timeular-auto-reconnect-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-negative);
+}
+
+.timeular-auto-reconnect-message.info {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+}
+
 .timeular-actions {
     display: flex;
     flex-direction: column;
