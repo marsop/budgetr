@@ -23,6 +23,7 @@ builder.Services.AddScoped<ISyncProvider, SupabaseSyncProvider>();
 builder.Services.AddScoped<IAutoSyncService, AutoSyncService>();
 builder.Services.AddScoped<IPwaService, PwaService>();
 builder.Services.AddScoped<ITutorialService, TutorialService>();
+builder.Services.AddScoped<ITimeularService, TimeularService>();
 // Load configuration
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 

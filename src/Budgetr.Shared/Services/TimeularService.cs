@@ -1,0 +1,240 @@
+using Budgetr.Shared.Models;
+using Microsoft.JSInterop;
+
+namespace Budgetr.Shared.Services;
+
+/// <summary>
+/// App-level Timeular integration service. Keeps listener active across page navigation.
+/// </summary>
+public sealed class TimeularService : ITimeularService, IDisposable
+{
+    private readonly IJSRuntime _jsRuntime;
+    private readonly ITimeTrackingService _timeService;
+    private readonly List<TimeularLogEntry> _changeLog = new();
+    private DotNetObjectReference<TimeularService>? _interopRef;
+
+    public bool IsInitialized { get; private set; }
+    public bool IsConnecting { get; private set; }
+    public bool IsConnected { get; private set; }
+    public string? DeviceName { get; private set; }
+    public string? StatusMessage { get; private set; }
+    public string StatusClass { get; private set; } = string.Empty;
+    public IReadOnlyList<TimeularLogEntry> ChangeLog => _changeLog;
+
+    public event Action? OnStateChanged;
+
+    public TimeularService(IJSRuntime jsRuntime, ITimeTrackingService timeService)
+    {
+        _jsRuntime = jsRuntime;
+        _timeService = timeService;
+    }
+
+    public async Task InitializeAsync()
+    {
+        if (IsInitialized)
+        {
+            return;
+        }
+
+        _interopRef = DotNetObjectReference.Create(this);
+        await _jsRuntime.InvokeVoidAsync("timeularInterop.registerListener", _interopRef);
+        await LoadStateAsync();
+        IsInitialized = true;
+        NotifyStateChanged();
+    }
+
+    public async Task ConnectAsync()
+    {
+        await InitializeAsync();
+
+        IsConnecting = true;
+        StatusMessage = null;
+        NotifyStateChanged();
+
+        try
+        {
+            var result = await _jsRuntime.InvokeAsync<TimeularConnectResult>("timeularInterop.requestAndConnect");
+            if (result.Success)
+            {
+                IsConnected = true;
+                DeviceName = result.DeviceName;
+                StatusMessage = $"Connected to {result.DeviceName}.";
+                StatusClass = "success";
+                AddTimeularChange($"Connected to {result.DeviceName ?? "Timeular"}");
+            }
+            else
+            {
+                IsConnected = false;
+                StatusMessage = result.Message ?? "Could not connect to the Timeular device.";
+                StatusClass = "error";
+                AddTimeularChange(StatusMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            IsConnected = false;
+            StatusMessage = $"Could not connect to Timeular: {ex.Message}";
+            StatusClass = "error";
+            AddTimeularChange(StatusMessage);
+        }
+        finally
+        {
+            IsConnecting = false;
+            NotifyStateChanged();
+        }
+    }
+
+    public async Task DisconnectAsync()
+    {
+        await InitializeAsync();
+
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("timeularInterop.disconnect");
+            IsConnected = false;
+            StatusMessage = "Timeular disconnected.";
+            StatusClass = "success";
+            AddTimeularChange("Disconnected from Timeular");
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Could not disconnect from Timeular: {ex.Message}";
+            StatusClass = "error";
+            AddTimeularChange(StatusMessage);
+        }
+
+        NotifyStateChanged();
+    }
+
+    [JSInvokable]
+    public Task OnTimeularChange(TimeularChangeEvent change)
+    {
+        if (change.EventType == "disconnected")
+        {
+            IsConnected = false;
+            StatusMessage = "Timeular disconnected.";
+            StatusClass = "error";
+            AddTimeularChange("Device disconnected");
+        }
+        else if (change.EventType == "orientation")
+        {
+            var faceLabel = change.Face.HasValue ? $"Face {change.Face.Value}" : "Face ?";
+            var rawLabel = string.IsNullOrWhiteSpace(change.RawHex) ? string.Empty : $" ({change.RawHex})";
+            var mappingAction = ApplyTimeularFaceMapping(change.Face);
+            AddTimeularChange($"{faceLabel}{rawLabel}{mappingAction}", change.TimestampUtc);
+        }
+        else
+        {
+            AddTimeularChange("Received a device event", change.TimestampUtc);
+        }
+
+        NotifyStateChanged();
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        _ = _jsRuntime.InvokeVoidAsync("timeularInterop.unregisterListener");
+        _interopRef?.Dispose();
+    }
+
+    private async Task LoadStateAsync()
+    {
+        try
+        {
+            var savedState = await _jsRuntime.InvokeAsync<TimeularSavedState?>("timeularInterop.getSavedState");
+            if (savedState is not null)
+            {
+                DeviceName = savedState.DeviceName;
+                IsConnected = false;
+                AddTimeularChange($"Known device: {DeviceName ?? "Timeular"}");
+            }
+        }
+        catch
+        {
+            // Ignore state restoration errors to avoid blocking startup
+        }
+    }
+
+    private string ApplyTimeularFaceMapping(int? face)
+    {
+        var orderedMeters = _timeService.Account.Meters
+            .OrderBy(m => m.DisplayOrder)
+            .ToList();
+
+        Meter? targetMeter = null;
+        if (face.HasValue && face.Value > 0)
+        {
+            targetMeter = orderedMeters.ElementAtOrDefault(face.Value - 1);
+        }
+
+        var activeEvent = _timeService.GetActiveEvent();
+        if (targetMeter is null)
+        {
+            if (activeEvent is not null)
+            {
+                _timeService.DeactivateMeter();
+                return " -> deactivated";
+            }
+
+            return string.Empty;
+        }
+
+        var isTargetAlreadyActive = activeEvent is not null
+            && activeEvent.MeterName == targetMeter.Name
+            && Math.Abs(activeEvent.Factor - targetMeter.Factor) < 0.0001;
+
+        if (isTargetAlreadyActive)
+        {
+            return " -> already active";
+        }
+
+        _timeService.ActivateMeter(targetMeter.Id);
+        var mappedIndex = orderedMeters.FindIndex(m => m.Id == targetMeter.Id) + 1;
+        return $" -> activated #{mappedIndex}";
+    }
+
+    private void AddTimeularChange(string message, string? timestampUtc = null)
+    {
+        var timestamp = DateTimeOffset.UtcNow;
+        if (!string.IsNullOrWhiteSpace(timestampUtc) && DateTimeOffset.TryParse(timestampUtc, out var parsed))
+        {
+            timestamp = parsed;
+        }
+
+        _changeLog.Insert(0, new TimeularLogEntry(timestamp, message));
+        if (_changeLog.Count > 4)
+        {
+            _changeLog.RemoveRange(4, _changeLog.Count - 4);
+        }
+    }
+
+    private void NotifyStateChanged()
+    {
+        OnStateChanged?.Invoke();
+    }
+
+    public sealed class TimeularSavedState
+    {
+        public string? DeviceName { get; set; }
+        public string? DeviceId { get; set; }
+        public string? ConnectedAtUtc { get; set; }
+    }
+
+    public sealed class TimeularConnectResult
+    {
+        public bool Success { get; set; }
+        public string? DeviceName { get; set; }
+        public string? DeviceId { get; set; }
+        public string? Message { get; set; }
+    }
+
+    public sealed class TimeularChangeEvent
+    {
+        public string? EventType { get; set; }
+        public int? Face { get; set; }
+        public string? RawHex { get; set; }
+        public string? TimestampUtc { get; set; }
+    }
+}
+

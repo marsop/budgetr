@@ -11,6 +11,7 @@
 @inject IJSRuntime JSRuntime
 @inject IConfiguration Configuration
 @inject IAutoSyncService AutoSyncService
+@inject ITimeularService TimeularService
 @implements IDisposable
 
 <div class="settings-page">
@@ -63,23 +64,23 @@
     <!-- Timeular Section -->
     <div class="settings-section">
         <h2 class="section-title">🧊 Timeular</h2>
-        <p class="setting-description">Connect your Timeular device from here. Functional mapping will be configured later.</p>
+        <p class="setting-description">Connect your Timeular device. Face index maps to meter index (for example, Face 3 activates meter #3).</p>
 
-        @if (!string.IsNullOrWhiteSpace(timeularDeviceName))
+        @if (!string.IsNullOrWhiteSpace(TimeularService.DeviceName))
         {
             <div class="timeular-device-info">
                 <span class="info-icon">📶</span>
-                <span>Selected device: @timeularDeviceName</span>
+                <span>Selected device: @TimeularService.DeviceName</span>
             </div>
         }
 
         <div class="timeular-actions">
-            <button class="sync-button timeular-connect-btn" @onclick="ConnectTimeularDevice" disabled="@isConnectingTimeular">
+            <button class="sync-button timeular-connect-btn" @onclick="ConnectTimeularDevice" disabled="@TimeularService.IsConnecting">
                 <span class="btn-icon">🔗</span>
-                <span>@(isConnectingTimeular ? "Connecting..." : (isTimeularConnected ? "Reconnect Timeular" : "Connect Timeular"))</span>
+                <span>@(TimeularService.IsConnecting ? "Connecting..." : (TimeularService.IsConnected ? "Reconnect Timeular" : "Connect Timeular"))</span>
             </button>
 
-            @if (isTimeularConnected)
+            @if (TimeularService.IsConnected)
             {
                 <button class="sync-button timeular-disconnect-btn" @onclick="DisconnectTimeularDevice">
                     <span class="btn-icon">🔌</span>
@@ -88,19 +89,19 @@
             }
         </div>
 
-        @if (!string.IsNullOrWhiteSpace(timeularStatusMessage))
+        @if (!string.IsNullOrWhiteSpace(TimeularService.StatusMessage))
         {
-            <div class="status-message @timeularStatusClass">
-                @timeularStatusMessage
+            <div class="status-message @TimeularService.StatusClass">
+                @TimeularService.StatusMessage
             </div>
         }
 
-        @if (timeularChangeLog.Count > 0)
+        @if (TimeularService.ChangeLog.Count > 0)
         {
             <div class="timeular-log">
                 <div class="timeular-log-title">Recent device changes</div>
                 <ul class="timeular-log-list">
-                    @foreach (var entry in timeularChangeLog)
+                    @foreach (var entry in TimeularService.ChangeLog)
                     {
                         <li class="timeular-log-item">
                             <span class="timeular-log-time">@entry.At.ToLocalTime().ToString("HH:mm:ss")</span>
@@ -372,15 +373,6 @@
     private bool isDropdownOpen = false;
     private bool isAvatarDropdownOpen = false;
 
-    // ===== Timeular State =====
-    private bool isConnectingTimeular;
-    private bool isTimeularConnected;
-    private string? timeularDeviceName;
-    private string? timeularStatusMessage;
-    private string timeularStatusClass = "";
-    private readonly List<TimeularLogEntry> timeularChangeLog = new();
-    private DotNetObjectReference<Settings>? timeularInteropRef;
-
     // ===== Sync (Import/Export) State =====
     private ElementReference fileInput;
     private string? selectedFileName;
@@ -449,6 +441,7 @@
     {
         SettingsService.OnSettingsChanged += StateHasChanged;
         TutorialService.OnChange += StateHasChanged;
+        TimeularService.OnStateChanged += OnTimeularStateChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -457,11 +450,7 @@
         {
             // Subscribe to auto-sync status changes
             AutoSyncService.OnStatusChanged += OnAutoSyncStatusChanged;
-
-            timeularInteropRef = DotNetObjectReference.Create(this);
-            await JSRuntime.InvokeVoidAsync("timeularInterop.registerListener", timeularInteropRef);
-            
-            await LoadTimeularStateAsync();
+            await TimeularService.InitializeAsync();
             await TryInitializeSupabase();
         }
     }
@@ -470,10 +459,8 @@
     {
         SettingsService.OnSettingsChanged -= StateHasChanged;
         TutorialService.OnChange -= StateHasChanged;
+        TimeularService.OnStateChanged -= OnTimeularStateChanged;
         AutoSyncService.OnStatusChanged -= OnAutoSyncStatusChanged;
-
-        _ = JSRuntime.InvokeVoidAsync("timeularInterop.unregisterListener");
-        timeularInteropRef?.Dispose();
     }
 
     // ===== Settings Methods =====
@@ -507,120 +494,13 @@
     }
 
     // ===== Timeular Methods =====
-    private async Task LoadTimeularStateAsync()
+    private async Task ConnectTimeularDevice() => await TimeularService.ConnectAsync();
+
+    private async Task DisconnectTimeularDevice() => await TimeularService.DisconnectAsync();
+
+    private void OnTimeularStateChanged()
     {
-        try
-        {
-            var savedState = await JSRuntime.InvokeAsync<TimeularSavedState?>("timeularInterop.getSavedState");
-            if (savedState is not null)
-            {
-                timeularDeviceName = savedState.DeviceName;
-                isTimeularConnected = false;
-                AddTimeularChange($"Known device: {timeularDeviceName ?? "Timeular"}");
-            }
-        }
-        catch
-        {
-            // Ignore state restoration errors to avoid blocking settings page
-        }
-    }
-
-    private async Task ConnectTimeularDevice()
-    {
-        isConnectingTimeular = true;
-        timeularStatusMessage = null;
-        StateHasChanged();
-
-        try
-        {
-            var result = await JSRuntime.InvokeAsync<TimeularConnectResult>("timeularInterop.requestAndConnect");
-            if (result.Success)
-            {
-                isTimeularConnected = true;
-                timeularDeviceName = result.DeviceName;
-                timeularStatusMessage = $"Connected to {result.DeviceName}.";
-                timeularStatusClass = "success";
-                AddTimeularChange($"Connected to {result.DeviceName ?? "Timeular"}");
-            }
-            else
-            {
-                isTimeularConnected = false;
-                timeularStatusMessage = result.Message ?? "Could not connect to the Timeular device.";
-                timeularStatusClass = "error";
-                AddTimeularChange(timeularStatusMessage);
-            }
-        }
-        catch (Exception ex)
-        {
-            isTimeularConnected = false;
-            timeularStatusMessage = $"Could not connect to Timeular: {ex.Message}";
-            timeularStatusClass = "error";
-            AddTimeularChange(timeularStatusMessage);
-        }
-        finally
-        {
-            isConnectingTimeular = false;
-            StateHasChanged();
-        }
-    }
-
-    private async Task DisconnectTimeularDevice()
-    {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("timeularInterop.disconnect");
-            isTimeularConnected = false;
-            timeularStatusMessage = "Timeular disconnected.";
-            timeularStatusClass = "success";
-            AddTimeularChange("Disconnected from Timeular");
-        }
-        catch (Exception ex)
-        {
-            timeularStatusMessage = $"Could not disconnect from Timeular: {ex.Message}";
-            timeularStatusClass = "error";
-            AddTimeularChange(timeularStatusMessage);
-        }
-
-        StateHasChanged();
-    }
-
-    [JSInvokable]
-    public Task OnTimeularChange(TimeularChangeEvent change)
-    {
-        if (change.EventType == "disconnected")
-        {
-            isTimeularConnected = false;
-            timeularStatusMessage = "Timeular disconnected.";
-            timeularStatusClass = "error";
-            AddTimeularChange("Device disconnected");
-        }
-        else if (change.EventType == "orientation")
-        {
-            var faceLabel = change.Face.HasValue ? $"Face {change.Face.Value}" : "Face ?";
-            var rawLabel = string.IsNullOrWhiteSpace(change.RawHex) ? "" : $" ({change.RawHex})";
-            AddTimeularChange($"{faceLabel}{rawLabel}", change.TimestampUtc);
-        }
-        else
-        {
-            AddTimeularChange("Received a device event", change.TimestampUtc);
-        }
-
-        return InvokeAsync(StateHasChanged);
-    }
-
-    private void AddTimeularChange(string message, string? timestampUtc = null)
-    {
-        var timestamp = DateTimeOffset.UtcNow;
-        if (!string.IsNullOrWhiteSpace(timestampUtc) && DateTimeOffset.TryParse(timestampUtc, out var parsed))
-        {
-            timestamp = parsed;
-        }
-
-        timeularChangeLog.Insert(0, new TimeularLogEntry(timestamp, message));
-        if (timeularChangeLog.Count > 4)
-        {
-            timeularChangeLog.RemoveRange(4, timeularChangeLog.Count - 4);
-        }
+        _ = InvokeAsync(StateHasChanged);
     }
 
     // ===== Data Management - Local Methods =====
@@ -1080,28 +960,4 @@
         }
     }
 
-    private sealed class TimeularSavedState
-    {
-        public string? DeviceName { get; set; }
-        public string? DeviceId { get; set; }
-        public string? ConnectedAtUtc { get; set; }
-    }
-
-    private sealed class TimeularConnectResult
-    {
-        public bool Success { get; set; }
-        public string? DeviceName { get; set; }
-        public string? DeviceId { get; set; }
-        public string? Message { get; set; }
-    }
-
-    public sealed class TimeularChangeEvent
-    {
-        public string? EventType { get; set; }
-        public int? Face { get; set; }
-        public string? RawHex { get; set; }
-        public string? TimestampUtc { get; set; }
-    }
-
-    private sealed record TimeularLogEntry(DateTimeOffset At, string Message);
 }
