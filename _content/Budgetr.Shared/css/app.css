@@ -86,8 +86,16 @@ body {
 .main-content {
     flex: 1;
     overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
     padding: var(--spacing-lg);
     padding-bottom: calc(60px + var(--spacing-lg));
+}
+
+.main-content::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 @media (min-width: 480px) {
@@ -1385,6 +1393,143 @@ body {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* ===== Timeular Section ===== */
+
+.timeular-device-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.timeular-connection-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.timeular-connection-light {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+    flex-shrink: 0;
+}
+
+.timeular-connection-light.connected {
+    background: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.timeular-connection-light.connecting {
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+.timeular-connection-light.disconnected {
+    background: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+.timeular-auto-reconnect-message {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
+
+.timeular-auto-reconnect-message.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-positive);
+}
+
+.timeular-auto-reconnect-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-negative);
+}
+
+.timeular-auto-reconnect-message.info {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+}
+
+.timeular-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.timeular-connect-btn {
+    background: #0ea5a8;
+    color: white;
+}
+
+.timeular-connect-btn:hover:not(:disabled) {
+    background: #0d8f91;
+    box-shadow: 0 0 20px rgba(14, 165, 168, 0.35);
+}
+
+.timeular-disconnect-btn {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.timeular-disconnect-btn:hover:not(:disabled) {
+    background: var(--color-bg-primary);
+}
+
+.timeular-log {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.timeular-log-title {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+}
+
+.timeular-log-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin: 0;
+    padding: 0;
+}
+
+.timeular-log-item {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: baseline;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.timeular-log-time {
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    min-width: 4.5rem;
+}
+
+.timeular-log-text {
+    color: var(--color-text-primary);
+    word-break: break-word;
 }
 
 /* ===== Meter Edit/Rename ===== */
