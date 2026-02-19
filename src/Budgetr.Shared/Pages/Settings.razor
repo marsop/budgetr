@@ -11,6 +11,7 @@
 @inject IJSRuntime JSRuntime
 @inject IConfiguration Configuration
 @inject IAutoSyncService AutoSyncService
+@inject ITimeularService TimeularService
 @implements IDisposable
 
 <div class="settings-page">
@@ -58,6 +59,76 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Timeular Section -->
+    <div class="settings-section">
+        <h2 class="section-title">🧊 Timeular</h2>
+        <p class="setting-description">Connect your Timeular device. Face index maps to meter index (for example, Face 3 activates meter #3).</p>
+
+        @if (!string.IsNullOrWhiteSpace(TimeularService.DeviceName))
+        {
+            <div class="timeular-device-info">
+                <span class="info-icon">📶</span>
+                <span>Selected device: @TimeularService.DeviceName</span>
+            </div>
+        }
+
+        @if (TimeularService.HasConnectedBefore)
+        {
+            <div class="timeular-connection-indicator">
+                <span class="timeular-connection-light @(TimeularService.IsConnecting ? "connecting" : (TimeularService.IsConnected ? "connected" : "disconnected"))"></span>
+                <span>
+                    Tracker status:
+                    @(TimeularService.IsConnecting ? "Connecting..." : (TimeularService.IsConnected ? "Connected" : "Disconnected"))
+                </span>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(TimeularService.AutoReconnectMessage))
+        {
+            <div class="timeular-auto-reconnect-message @TimeularService.AutoReconnectClass">
+                @TimeularService.AutoReconnectMessage
+            </div>
+        }
+
+        <div class="timeular-actions">
+            <button class="sync-button timeular-connect-btn" @onclick="ConnectTimeularDevice" disabled="@TimeularService.IsConnecting">
+                <span class="btn-icon">🔗</span>
+                <span>@(TimeularService.IsConnecting ? "Connecting..." : (TimeularService.IsConnected ? "Reconnect Timeular" : "Connect Timeular"))</span>
+            </button>
+
+            @if (TimeularService.IsConnected)
+            {
+                <button class="sync-button timeular-disconnect-btn" @onclick="DisconnectTimeularDevice">
+                    <span class="btn-icon">🔌</span>
+                    <span>Disconnect</span>
+                </button>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(TimeularService.StatusMessage))
+        {
+            <div class="status-message @TimeularService.StatusClass">
+                @TimeularService.StatusMessage
+            </div>
+        }
+
+        @if (TimeularService.ChangeLog.Count > 0)
+        {
+            <div class="timeular-log">
+                <div class="timeular-log-title">Recent device changes</div>
+                <ul class="timeular-log-list">
+                    @foreach (var entry in TimeularService.ChangeLog)
+                    {
+                        <li class="timeular-log-item">
+                            <span class="timeular-log-time">@entry.At.ToLocalTime().ToString("HH:mm:ss")</span>
+                            <span class="timeular-log-text">@entry.Message</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
     </div>
 
     <!-- Data Management Section -->
@@ -388,6 +459,7 @@
     {
         SettingsService.OnSettingsChanged += StateHasChanged;
         TutorialService.OnChange += StateHasChanged;
+        TimeularService.OnStateChanged += OnTimeularStateChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -396,7 +468,7 @@
         {
             // Subscribe to auto-sync status changes
             AutoSyncService.OnStatusChanged += OnAutoSyncStatusChanged;
-            
+            await TimeularService.InitializeAsync();
             await TryInitializeSupabase();
         }
     }
@@ -405,6 +477,7 @@
     {
         SettingsService.OnSettingsChanged -= StateHasChanged;
         TutorialService.OnChange -= StateHasChanged;
+        TimeularService.OnStateChanged -= OnTimeularStateChanged;
         AutoSyncService.OnStatusChanged -= OnAutoSyncStatusChanged;
     }
 
@@ -436,6 +509,16 @@
     {
         await TutorialService.SetAvatarAsync(avatarId);
         isAvatarDropdownOpen = false;
+    }
+
+    // ===== Timeular Methods =====
+    private async Task ConnectTimeularDevice() => await TimeularService.ConnectAsync();
+
+    private async Task DisconnectTimeularDevice() => await TimeularService.DisconnectAsync();
+
+    private void OnTimeularStateChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
     }
 
     // ===== Data Management - Local Methods =====
@@ -894,4 +977,5 @@
             // Error handling can be added here if needed
         }
     }
+
 }

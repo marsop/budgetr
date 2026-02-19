@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @using Budgetr.Shared.Services
 @inject IPwaService PwaService
+@inject ITimeularService TimeularService
 @inject IStringLocalizer<Strings> Localizer
 @implements IDisposable
 
@@ -63,6 +64,14 @@
         PwaService.OnStateChanged += StateHasChanged;
         
         await PwaService.InitializeAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TimeularService.InitializeAsync();
+        }
     }
 
     private async Task InstallApp()
