@@ -230,7 +230,8 @@ public class TimeTrackingServiceTests
             new Meter { Name = "Break", Factor = -1, DisplayOrder = 1 }
         });
         var settings = settingsService ?? new StubSettingsService();
-        var service = new TimeTrackingService(storage, config, settings);
+        var notifications = new StubNotificationService();
+        var service = new TimeTrackingService(storage, config, settings, notifications);
         await service.LoadAsync();
         return service;
     }

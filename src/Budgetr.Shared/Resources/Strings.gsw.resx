@@ -502,4 +502,13 @@
   <data name="SuccessSupabaseRestore" xml:space="preserve">
     <value>Data vo Supabase kloo!</value>
   </data>
+  <data name="BrowserNotifications" xml:space="preserve">
+    <value>Browser-Benochrichtigonga</value>
+  </data>
+  <data name="BrowserNotificationsDesc" xml:space="preserve">
+    <value>Systemmeldonga azoiga, wenn a Meter aktiviert oder deaktiviert wird</value>
+  </data>
+  <data name="BrowserNotificationsDenied" xml:space="preserve">
+    <value>Benochrichtigonga vom Browser blockiert. Bitte in da Browseriistellonga erlauba.</value>
+  </data>
 </root>

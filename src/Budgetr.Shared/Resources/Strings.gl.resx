@@ -502,4 +502,13 @@
   <data name="SuccessSupabaseRestore" xml:space="preserve">
     <value>Datos restaurados con éxito dende Supabase!</value>
   </data>
+  <data name="BrowserNotifications" xml:space="preserve">
+    <value>Notificacións do navegador</value>
+  </data>
+  <data name="BrowserNotificationsDesc" xml:space="preserve">
+    <value>Mostrar notificacións do sistema cando un medidor se activa ou desactiva</value>
+  </data>
+  <data name="BrowserNotificationsDenied" xml:space="preserve">
+    <value>Notificacións bloqueadas polo navegador. Permiteas na configuración do navegador.</value>
+  </data>
 </root>

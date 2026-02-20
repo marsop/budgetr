@@ -12,6 +12,7 @@
 @inject IConfiguration Configuration
 @inject IAutoSyncService AutoSyncService
 @inject ITimeularService TimeularService
+@inject INotificationService NotificationService
 @implements IDisposable
 
 <div class="settings-page">
@@ -59,6 +60,24 @@
                 </div>
             </div>
         </div>
+
+        <div class="setting-item">
+            <div>
+                <span class="setting-label">@Localizer["BrowserNotifications"]</span>
+                <span class="setting-description" style="display: block; margin-top: 2px;">@Localizer["BrowserNotificationsDesc"]</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked="@SettingsService.BrowserNotificationsEnabled" @onchange="OnBrowserNotificationsToggled" />
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        @if (browserNotificationsDenied)
+        {
+            <div class="status-message error" style="margin-top: var(--spacing-sm);">
+                @Localizer["BrowserNotificationsDenied"]
+            </div>
+        }
     </div>
 
     <!-- Timeular Section -->
@@ -431,6 +450,9 @@
     private bool showConfirmation1;
     private bool showConfirmation2;
 
+    // ===== Notification State =====
+    private bool browserNotificationsDenied;
+
     // ===== Language Configuration =====
     private string SelectedLanguage => SettingsService.Language;
 
@@ -519,6 +541,34 @@
     private void OnTimeularStateChanged()
     {
         _ = InvokeAsync(StateHasChanged);
+    }
+
+    // ===== Browser Notification Methods =====
+    private async Task OnBrowserNotificationsToggled(ChangeEventArgs e)
+    {
+        var enabled = (bool)(e.Value ?? false);
+
+        if (enabled)
+        {
+            var permission = await NotificationService.RequestBrowserPermissionAsync();
+            if (permission == "granted")
+            {
+                SettingsService.BrowserNotificationsEnabled = true;
+                browserNotificationsDenied = false;
+            }
+            else
+            {
+                SettingsService.BrowserNotificationsEnabled = false;
+                browserNotificationsDenied = permission == "denied";
+            }
+        }
+        else
+        {
+            SettingsService.BrowserNotificationsEnabled = false;
+            browserNotificationsDenied = false;
+        }
+
+        StateHasChanged();
     }
 
     // ===== Data Management - Local Methods =====

@@ -505,4 +505,13 @@
   <data name="SuccessSupabaseRestore" xml:space="preserve">
     <value>Data restored successfully from Supabase!</value>
   </data>
+  <data name="BrowserNotifications" xml:space="preserve">
+    <value>Browser Notifications</value>
+  </data>
+  <data name="BrowserNotificationsDesc" xml:space="preserve">
+    <value>Show system notifications when a meter is activated or deactivated</value>
+  </data>
+  <data name="BrowserNotificationsDenied" xml:space="preserve">
+    <value>Notifications blocked by browser. Please allow them in your browser settings.</value>
+  </data>
 </root>

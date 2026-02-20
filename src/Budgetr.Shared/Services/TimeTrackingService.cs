@@ -11,6 +11,7 @@ public class TimeTrackingService : ITimeTrackingService
     private readonly IStorageService _storage;
     private readonly IMeterConfigurationService _meterConfig;
     private readonly ISettingsService _settingsService;
+    private readonly INotificationService _notificationService;
     private TimeAccount _account = new TimeAccount();
     private const string StorageKey = "budgetr_account";
     public const int MaxMeters = 8;
@@ -33,11 +34,12 @@ public class TimeTrackingService : ITimeTrackingService
     
     public event Action? OnStateChanged;
 
-    public TimeTrackingService(IStorageService storage, IMeterConfigurationService meterConfig, ISettingsService settingsService)
+    public TimeTrackingService(IStorageService storage, IMeterConfigurationService meterConfig, ISettingsService settingsService, INotificationService notificationService)
     {
         _storage = storage;
         _meterConfig = meterConfig;
         _settingsService = settingsService;
+        _notificationService = notificationService;
     }
 
     public TimeSpan GetCurrentBalance()
@@ -52,8 +54,8 @@ public class TimeTrackingService : ITimeTrackingService
 
     public void ActivateMeter(Guid meterId)
     {
-        // First deactivate any active meter
-        DeactivateMeter();
+        // Deactivate any active meter silently (no notification since we're switching)
+        DeactivateInternal();
         
         var meter = _account.Meters.FirstOrDefault(m => m.Id == meterId);
         if (meter == null) return;
@@ -68,9 +70,21 @@ public class TimeTrackingService : ITimeTrackingService
         _account.Events.Add(newEvent);
         OnStateChanged?.Invoke();
         _ = SaveAsync();
+        _ = _notificationService.NotifyAsync("⏱️", meter.Name);
     }
 
     public void DeactivateMeter()
+    {
+        var activeEvent = GetActiveEvent();
+        if (activeEvent != null)
+        {
+            var meterName = activeEvent.MeterName;
+            DeactivateInternal();
+            _ = _notificationService.NotifyAsync("⏹️", meterName);
+        }
+    }
+
+    private void DeactivateInternal()
     {
         var activeEvent = GetActiveEvent();
         if (activeEvent != null)

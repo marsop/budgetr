@@ -16,6 +16,11 @@ public interface ISettingsService
     bool TutorialCompleted { get; set; }
 
     /// <summary>
+    /// Gets or sets whether browser notifications are enabled.
+    /// </summary>
+    bool BrowserNotificationsEnabled { get; set; }
+
+    /// <summary>
     /// Event raised when any setting changes.
     /// </summary>
     event Action? OnSettingsChanged;

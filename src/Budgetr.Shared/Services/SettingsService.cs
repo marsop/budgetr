@@ -13,6 +13,7 @@ public class SettingsService : ISettingsService
     private const string DefaultLanguage = "en";
 
     private bool _tutorialCompleted;
+    private bool _browserNotificationsEnabled;
     private string _language = DefaultLanguage;
 
     public bool TutorialCompleted
@@ -23,6 +24,20 @@ public class SettingsService : ISettingsService
             if (_tutorialCompleted != value)
             {
                 _tutorialCompleted = value;
+                OnSettingsChanged?.Invoke();
+                _ = SaveAsync();
+            }
+        }
+    }
+
+    public bool BrowserNotificationsEnabled
+    {
+        get => _browserNotificationsEnabled;
+        set
+        {
+            if (_browserNotificationsEnabled != value)
+            {
+                _browserNotificationsEnabled = value;
                 OnSettingsChanged?.Invoke();
                 _ = SaveAsync();
             }
@@ -71,6 +86,7 @@ public class SettingsService : ISettingsService
                 {
                     _language = string.IsNullOrEmpty(data.Language) ? DefaultLanguage : data.Language;
                     _tutorialCompleted = data.TutorialCompleted;
+                    _browserNotificationsEnabled = data.BrowserNotificationsEnabled;
                 }
             }
             catch
@@ -78,6 +94,7 @@ public class SettingsService : ISettingsService
                 // If deserialization fails, keep defaults
                 _language = DefaultLanguage;
                 _tutorialCompleted = false;
+                _browserNotificationsEnabled = false;
             }
         }
         
@@ -112,7 +129,8 @@ public class SettingsService : ISettingsService
         var data = new SettingsData 
         { 
             Language = _language,
-            TutorialCompleted = _tutorialCompleted
+            TutorialCompleted = _tutorialCompleted,
+            BrowserNotificationsEnabled = _browserNotificationsEnabled
         };
         var json = JsonSerializer.Serialize(data);
         await _storage.SetItemAsync(StorageKey, json);
@@ -126,4 +144,5 @@ internal class SettingsData
 {
     public string Language { get; set; } = "en";
     public bool TutorialCompleted { get; set; }
+    public bool BrowserNotificationsEnabled { get; set; }
 }

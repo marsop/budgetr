@@ -59,6 +59,7 @@ internal sealed class StubSettingsService : ISettingsService
 {
     public string Language { get; set; } = "en";
     public bool TutorialCompleted { get; set; }
+    public bool BrowserNotificationsEnabled { get; set; }
     public event Action? OnSettingsChanged;
 
     public Task LoadAsync() => Task.CompletedTask;
@@ -70,4 +71,20 @@ internal sealed class StubSettingsService : ISettingsService
         OnSettingsChanged?.Invoke();
         return Task.CompletedTask;
     }
+}
+
+internal sealed class StubNotificationService : INotificationService
+{
+    public List<(string Title, string Body)> SentNotifications { get; } = new();
+    public event Action<ToastMessage>? OnToastReceived;
+
+    public Task NotifyAsync(string title, string body)
+    {
+        SentNotifications.Add((title, body));
+        OnToastReceived?.Invoke(new ToastMessage(title, body, DateTimeOffset.UtcNow));
+        return Task.CompletedTask;
+    }
+
+    public Task<string> GetBrowserPermissionStateAsync() => Task.FromResult("default");
+    public Task<string> RequestBrowserPermissionAsync() => Task.FromResult("default");
 }

@@ -502,4 +502,13 @@
   <data name="SuccessSupabaseRestore" xml:space="preserve">
     <value>Daten erfolgreich von Supabase wiederhergestellt!</value>
   </data>
+  <data name="BrowserNotifications" xml:space="preserve">
+    <value>Browser-Benachrichtigungen</value>
+  </data>
+  <data name="BrowserNotificationsDesc" xml:space="preserve">
+    <value>Systembenachrichtigungen anzeigen, wenn ein Meter aktiviert oder deaktiviert wird</value>
+  </data>
+  <data name="BrowserNotificationsDenied" xml:space="preserve">
+    <value>Benachrichtigungen vom Browser blockiert. Bitte in den Browsereinstellungen erlauben.</value>
+  </data>
 </root>
