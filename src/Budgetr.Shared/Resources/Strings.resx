@@ -538,4 +538,16 @@
   <data name="NotificationSupabaseSignedOutBody" xml:space="preserve">
     <value>Successfully signed out of Supabase.</value>
   </data>
+  <data name="NotificationTimeularConnectedTitle" xml:space="preserve">
+    <value>🧊 Timeular Connected</value>
+  </data>
+  <data name="NotificationTimeularConnectedBody" xml:space="preserve">
+    <value>Successfully connected to your Timeular tracker.</value>
+  </data>
+  <data name="NotificationTimeularDisconnectedTitle" xml:space="preserve">
+    <value>🔌 Timeular Disconnected</value>
+  </data>
+  <data name="NotificationTimeularDisconnectedBody" xml:space="preserve">
+    <value>Your Timeular tracker has been disconnected.</value>
+  </data>
 </root>

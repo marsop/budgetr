@@ -535,4 +535,16 @@
   <data name="NotificationSupabaseSignedOutBody" xml:space="preserve">
     <value>Pechaches sesión en Supabase con éxito.</value>
   </data>
+  <data name="NotificationTimeularConnectedTitle" xml:space="preserve">
+    <value>🧊 Timeular conectado</value>
+  </data>
+  <data name="NotificationTimeularConnectedBody" xml:space="preserve">
+    <value>Conectado correctamente ao teu rastrexador Timeular.</value>
+  </data>
+  <data name="NotificationTimeularDisconnectedTitle" xml:space="preserve">
+    <value>🔌 Timeular desconectado</value>
+  </data>
+  <data name="NotificationTimeularDisconnectedBody" xml:space="preserve">
+    <value>O teu rastrexador Timeular desconectouse.</value>
+  </data>
 </root>

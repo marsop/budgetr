@@ -535,4 +535,16 @@
   <data name="NotificationSupabaseSignedOutBody" xml:space="preserve">
     <value>Erfolgreich von Supabase abgemeldet.</value>
   </data>
+  <data name="NotificationTimeularConnectedTitle" xml:space="preserve">
+    <value>🧊 Timeular verbunden</value>
+  </data>
+  <data name="NotificationTimeularConnectedBody" xml:space="preserve">
+    <value>Erfolgreich mit deinem Timeular-Tracker verbunden.</value>
+  </data>
+  <data name="NotificationTimeularDisconnectedTitle" xml:space="preserve">
+    <value>🔌 Timeular getrennt</value>
+  </data>
+  <data name="NotificationTimeularDisconnectedBody" xml:space="preserve">
+    <value>Dein Timeular-Tracker wurde getrennt.</value>
+  </data>
 </root>

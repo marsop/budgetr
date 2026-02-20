@@ -535,4 +535,16 @@
   <data name="NotificationSupabaseSignedOutBody" xml:space="preserve">
     <value>Erfolgriich vo Supabase abgmulde.</value>
   </data>
+  <data name="NotificationTimeularConnectedTitle" xml:space="preserve">
+    <value>🧊 Timeular verbunda</value>
+  </data>
+  <data name="NotificationTimeularConnectedBody" xml:space="preserve">
+    <value>Erfolgriich mit dim Timeular-Tracker verbunda.</value>
+  </data>
+  <data name="NotificationTimeularDisconnectedTitle" xml:space="preserve">
+    <value>🔌 Timeular trennt</value>
+  </data>
+  <data name="NotificationTimeularDisconnectedBody" xml:space="preserve">
+    <value>Din Timeular-Tracker isch trennt worra.</value>
+  </data>
 </root>

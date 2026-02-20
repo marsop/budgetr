@@ -1,4 +1,6 @@
 using Budgetr.Shared.Models;
+using Budgetr.Shared.Resources;
+using Microsoft.Extensions.Localization;
 using Microsoft.JSInterop;
 
 namespace Budgetr.Shared.Services;
@@ -10,6 +12,8 @@ public sealed class TimeularService : ITimeularService, IDisposable
 {
     private readonly IJSRuntime _jsRuntime;
     private readonly ITimeTrackingService _timeService;
+    private readonly INotificationService _notificationService;
+    private readonly IStringLocalizer<Strings> _localizer;
     private readonly List<TimeularLogEntry> _changeLog = new();
     private DotNetObjectReference<TimeularService>? _interopRef;
 
@@ -26,10 +30,12 @@ public sealed class TimeularService : ITimeularService, IDisposable
 
     public event Action? OnStateChanged;
 
-    public TimeularService(IJSRuntime jsRuntime, ITimeTrackingService timeService)
+    public TimeularService(IJSRuntime jsRuntime, ITimeTrackingService timeService, INotificationService notificationService, IStringLocalizer<Strings> localizer)
     {
         _jsRuntime = jsRuntime;
         _timeService = timeService;
+        _notificationService = notificationService;
+        _localizer = localizer;
     }
 
     public async Task InitializeAsync()
@@ -66,6 +72,10 @@ public sealed class TimeularService : ITimeularService, IDisposable
                 StatusMessage = $"Connected to {result.DeviceName}.";
                 StatusClass = "success";
                 AddTimeularChange($"Connected to {result.DeviceName ?? "Timeular"}");
+
+                _ = _notificationService.NotifyAsync(
+                    _localizer["NotificationTimeularConnectedTitle"],
+                    _localizer["NotificationTimeularConnectedBody"]);
             }
             else
             {
@@ -100,6 +110,10 @@ public sealed class TimeularService : ITimeularService, IDisposable
             StatusMessage = "Timeular disconnected.";
             StatusClass = "success";
             AddTimeularChange("Disconnected from Timeular");
+
+            _ = _notificationService.NotifyAsync(
+                _localizer["NotificationTimeularDisconnectedTitle"],
+                _localizer["NotificationTimeularDisconnectedBody"]);
         }
         catch (Exception ex)
         {
@@ -120,6 +134,10 @@ public sealed class TimeularService : ITimeularService, IDisposable
             StatusMessage = "Timeular disconnected.";
             StatusClass = "error";
             AddTimeularChange("Device disconnected");
+
+            _ = _notificationService.NotifyAsync(
+                _localizer["NotificationTimeularDisconnectedTitle"],
+                _localizer["NotificationTimeularDisconnectedBody"]);
         }
         else if (change.EventType == "orientation")
         {
@@ -184,6 +202,10 @@ public sealed class TimeularService : ITimeularService, IDisposable
                 AutoReconnectMessage = $"Auto-reconnect succeeded: {DeviceName ?? "Timeular"} is connected.";
                 AutoReconnectClass = "success";
                 AddTimeularChange($"Reconnected to {DeviceName ?? "Timeular"}");
+
+                _ = _notificationService.NotifyAsync(
+                    _localizer["NotificationTimeularConnectedTitle"],
+                    _localizer["NotificationTimeularConnectedBody"]);
                 return;
             }
 
