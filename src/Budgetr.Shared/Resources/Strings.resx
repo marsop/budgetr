@@ -526,4 +526,16 @@
   <data name="NotificationMeterStoppedBody" xml:space="preserve">
     <value>You have stopped tracking '{0}'.</value>
   </data>
+  <data name="NotificationSupabaseSignedInTitle" xml:space="preserve">
+    <value>✅ Signed In</value>
+  </data>
+  <data name="NotificationSupabaseSignedInBody" xml:space="preserve">
+    <value>Successfully signed in to Supabase.</value>
+  </data>
+  <data name="NotificationSupabaseSignedOutTitle" xml:space="preserve">
+    <value>👋 Signed Out</value>
+  </data>
+  <data name="NotificationSupabaseSignedOutBody" xml:space="preserve">
+    <value>Successfully signed out of Supabase.</value>
+  </data>
 </root>

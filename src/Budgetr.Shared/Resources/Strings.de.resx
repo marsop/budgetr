@@ -523,4 +523,16 @@
   <data name="NotificationMeterStoppedBody" xml:space="preserve">
     <value>Du hast die Erfassung von '{0}' beendet.</value>
   </data>
+  <data name="NotificationSupabaseSignedInTitle" xml:space="preserve">
+    <value>✅ Angemeldet</value>
+  </data>
+  <data name="NotificationSupabaseSignedInBody" xml:space="preserve">
+    <value>Erfolgreich bei Supabase angemeldet.</value>
+  </data>
+  <data name="NotificationSupabaseSignedOutTitle" xml:space="preserve">
+    <value>👋 Abgemeldet</value>
+  </data>
+  <data name="NotificationSupabaseSignedOutBody" xml:space="preserve">
+    <value>Erfolgreich von Supabase abgemeldet.</value>
+  </data>
 </root>

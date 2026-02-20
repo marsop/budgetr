@@ -523,4 +523,16 @@
   <data name="NotificationMeterStoppedBody" xml:space="preserve">
     <value>Has dejado de registrar '{0}'.</value>
   </data>
+  <data name="NotificationSupabaseSignedInTitle" xml:space="preserve">
+    <value>✅ Sesión iniciada</value>
+  </data>
+  <data name="NotificationSupabaseSignedInBody" xml:space="preserve">
+    <value>Has iniciado sesión en Supabase con éxito.</value>
+  </data>
+  <data name="NotificationSupabaseSignedOutTitle" xml:space="preserve">
+    <value>👋 Sesión cerrada</value>
+  </data>
+  <data name="NotificationSupabaseSignedOutBody" xml:space="preserve">
+    <value>Has cerrado sesión en Supabase con éxito.</value>
+  </data>
 </root>

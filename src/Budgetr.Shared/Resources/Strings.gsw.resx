@@ -523,4 +523,16 @@
   <data name="NotificationMeterStoppedBody" xml:space="preserve">
     <value>Du hesch d'Erfassig vo '{0}' beändet.</value>
   </data>
+  <data name="NotificationSupabaseSignedInTitle" xml:space="preserve">
+    <value>✅ Aagmulde</value>
+  </data>
+  <data name="NotificationSupabaseSignedInBody" xml:space="preserve">
+    <value>Erfolgriich bi Supabase aagmulde.</value>
+  </data>
+  <data name="NotificationSupabaseSignedOutTitle" xml:space="preserve">
+    <value>👋 Abgmulde</value>
+  </data>
+  <data name="NotificationSupabaseSignedOutBody" xml:space="preserve">
+    <value>Erfolgriich vo Supabase abgmulde.</value>
+  </data>
 </root>

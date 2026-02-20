@@ -816,6 +816,10 @@
             statusClass = "success";
             // Clear password field
             supabasePasswordInput = null;
+
+            await NotificationService.NotifyAsync(
+                Localizer["NotificationSupabaseSignedInTitle"],
+                Localizer["NotificationSupabaseSignedInBody"]);
         }
         catch (Exception ex)
         {
@@ -851,6 +855,10 @@
                 statusMessage = Localizer["SuccessSignUp"];
                 statusClass = "success";
                 supabasePasswordInput = null;
+
+                await NotificationService.NotifyAsync(
+                    Localizer["NotificationSupabaseSignedInTitle"],
+                    Localizer["NotificationSupabaseSignedInBody"]);
             }
             else
             {
@@ -887,6 +895,10 @@
             supabaseLastBackupTime = null;
             statusMessage = Localizer["SuccessSignOut"];
             statusClass = "success";
+
+            await NotificationService.NotifyAsync(
+                Localizer["NotificationSupabaseSignedOutTitle"],
+                Localizer["NotificationSupabaseSignedOutBody"]);
         }
         catch (Exception ex)
         {
