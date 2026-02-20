@@ -511,4 +511,16 @@
   <data name="BrowserNotificationsDenied" xml:space="preserve">
     <value>Notificaciones bloqueadas por el navegador. Permítelas en la configuración del navegador.</value>
   </data>
+  <data name="NotificationMeterStartedTitle" xml:space="preserve">
+    <value>⏱️ Contador Iniciado</value>
+  </data>
+  <data name="NotificationMeterStartedBody" xml:space="preserve">
+    <value>Ahora estás registrando '{0}'.</value>
+  </data>
+  <data name="NotificationMeterStoppedTitle" xml:space="preserve">
+    <value>⏹️ Contador Detenido</value>
+  </data>
+  <data name="NotificationMeterStoppedBody" xml:space="preserve">
+    <value>Has dejado de registrar '{0}'.</value>
+  </data>
 </root>

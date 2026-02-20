@@ -1,5 +1,6 @@
 using Budgetr.Shared.Models;
 using System.Text.Json;
+using Microsoft.Extensions.Localization;
 
 namespace Budgetr.Shared.Services;
 
@@ -12,6 +13,7 @@ public class TimeTrackingService : ITimeTrackingService
     private readonly IMeterConfigurationService _meterConfig;
     private readonly ISettingsService _settingsService;
     private readonly INotificationService _notificationService;
+    private readonly IStringLocalizer<Budgetr.Shared.Resources.Strings> _localizer;
     private TimeAccount _account = new TimeAccount();
     private const string StorageKey = "budgetr_account";
     public const int MaxMeters = 8;
@@ -34,12 +36,13 @@ public class TimeTrackingService : ITimeTrackingService
     
     public event Action? OnStateChanged;
 
-    public TimeTrackingService(IStorageService storage, IMeterConfigurationService meterConfig, ISettingsService settingsService, INotificationService notificationService)
+    public TimeTrackingService(IStorageService storage, IMeterConfigurationService meterConfig, ISettingsService settingsService, INotificationService notificationService, IStringLocalizer<Budgetr.Shared.Resources.Strings> localizer)
     {
         _storage = storage;
         _meterConfig = meterConfig;
         _settingsService = settingsService;
         _notificationService = notificationService;
+        _localizer = localizer;
     }
 
     public TimeSpan GetCurrentBalance()
@@ -70,7 +73,10 @@ public class TimeTrackingService : ITimeTrackingService
         _account.Events.Add(newEvent);
         OnStateChanged?.Invoke();
         _ = SaveAsync();
-        _ = _notificationService.NotifyAsync("⏱️", meter.Name);
+        _ = _notificationService.NotifyAsync(
+            _localizer["NotificationMeterStartedTitle"],
+            string.Format(_localizer["NotificationMeterStartedBody"], meter.Name)
+        );
     }
 
     public void DeactivateMeter()
@@ -80,7 +86,10 @@ public class TimeTrackingService : ITimeTrackingService
         {
             var meterName = activeEvent.MeterName;
             DeactivateInternal();
-            _ = _notificationService.NotifyAsync("⏹️", meterName);
+            _ = _notificationService.NotifyAsync(
+                _localizer["NotificationMeterStoppedTitle"],
+                string.Format(_localizer["NotificationMeterStoppedBody"], meterName)
+            );
         }
     }
 

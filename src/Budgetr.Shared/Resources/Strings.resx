@@ -514,4 +514,16 @@
   <data name="BrowserNotificationsDenied" xml:space="preserve">
     <value>Notifications blocked by browser. Please allow them in your browser settings.</value>
   </data>
+  <data name="NotificationMeterStartedTitle" xml:space="preserve">
+    <value>⏱️ Meter Started</value>
+  </data>
+  <data name="NotificationMeterStartedBody" xml:space="preserve">
+    <value>You are now tracking '{0}'.</value>
+  </data>
+  <data name="NotificationMeterStoppedTitle" xml:space="preserve">
+    <value>⏹️ Meter Stopped</value>
+  </data>
+  <data name="NotificationMeterStoppedBody" xml:space="preserve">
+    <value>You have stopped tracking '{0}'.</value>
+  </data>
 </root>

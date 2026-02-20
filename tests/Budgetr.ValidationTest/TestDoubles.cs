@@ -1,5 +1,6 @@
 using Budgetr.Shared.Models;
 using Budgetr.Shared.Services;
+using Microsoft.Extensions.Localization;
 
 namespace Budgetr.ValidationTest;
 
@@ -87,4 +88,13 @@ internal sealed class StubNotificationService : INotificationService
 
     public Task<string> GetBrowserPermissionStateAsync() => Task.FromResult("default");
     public Task<string> RequestBrowserPermissionAsync() => Task.FromResult("default");
+}
+
+internal sealed class StubStringLocalizer : IStringLocalizer<Budgetr.Shared.Resources.Strings>
+{
+    public LocalizedString this[string name] => new LocalizedString(name, name);
+
+    public LocalizedString this[string name, params object[] arguments] => new LocalizedString(name, string.Format(name, arguments));
+
+    public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => Enumerable.Empty<LocalizedString>();
 }

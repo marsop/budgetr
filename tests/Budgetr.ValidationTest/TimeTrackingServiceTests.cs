@@ -18,7 +18,7 @@ public class TimeTrackingServiceTests
         var storage = new InMemoryStorageService();
         var config = new StubMeterConfigurationService(defaultMeters);
         var settings = new StubSettingsService();
-        var sut = new TimeTrackingService(storage, config, settings);
+        var sut = new TimeTrackingService(storage, config, settings, new StubNotificationService(), new StubStringLocalizer());
 
         await sut.LoadAsync();
 
@@ -46,7 +46,7 @@ public class TimeTrackingServiceTests
             new Meter { Name = "Default", Factor = 1, DisplayOrder = 0 }
         });
         var settings = new StubSettingsService();
-        var sut = new TimeTrackingService(storage, config, settings);
+        var sut = new TimeTrackingService(storage, config, settings, new StubNotificationService(), new StubStringLocalizer());
 
         await sut.LoadAsync();
 
@@ -231,7 +231,8 @@ public class TimeTrackingServiceTests
         });
         var settings = settingsService ?? new StubSettingsService();
         var notifications = new StubNotificationService();
-        var service = new TimeTrackingService(storage, config, settings, notifications);
+        var localizer = new StubStringLocalizer();
+        var service = new TimeTrackingService(storage, config, settings, notifications, localizer);
         await service.LoadAsync();
         return service;
     }

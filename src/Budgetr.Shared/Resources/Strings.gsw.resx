@@ -511,4 +511,16 @@
   <data name="BrowserNotificationsDenied" xml:space="preserve">
     <value>Benochrichtigonga vom Browser blockiert. Bitte in da Browseriistellonga erlauba.</value>
   </data>
+  <data name="NotificationMeterStartedTitle" xml:space="preserve">
+    <value>⏱️ Zähler Gstartet</value>
+  </data>
+  <data name="NotificationMeterStartedBody" xml:space="preserve">
+    <value>Du erfassisch jetzt '{0}'.</value>
+  </data>
+  <data name="NotificationMeterStoppedTitle" xml:space="preserve">
+    <value>⏹️ Zähler Gstoppt</value>
+  </data>
+  <data name="NotificationMeterStoppedBody" xml:space="preserve">
+    <value>Du hesch d'Erfassig vo '{0}' beändet.</value>
+  </data>
 </root>
