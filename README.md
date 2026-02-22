@@ -49,7 +49,7 @@ Budgetr is a time-tracking application built with Blazor WebAssembly. It helps y
 
 ## Technology Stack
 
-- **.NET 9.0**
+- **.NET 10.0**
 - **Blazor WebAssembly** - Web application
 - **Shared Razor Components** - Reusable UI library
 
@@ -76,7 +76,7 @@ budgetr/
 
 ### Prerequisites
 
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ### Running the Web Application
 
