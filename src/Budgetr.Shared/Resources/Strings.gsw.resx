@@ -547,4 +547,10 @@
   <data name="NotificationTimeularDisconnectedBody" xml:space="preserve">
     <value>Din Timeular-Tracker isch trennt worra.</value>
   </data>
+  <data name="NotificationMeterActiveTitle" xml:space="preserve">
+    <value>🔵 Zähler Aktiv</value>
+  </data>
+  <data name="NotificationMeterActiveBody" xml:space="preserve">
+    <value>Du erfasst no '{0}'.</value>
+  </data>
 </root>

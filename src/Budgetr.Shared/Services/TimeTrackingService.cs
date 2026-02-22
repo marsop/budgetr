@@ -1,22 +1,27 @@
 using Budgetr.Shared.Models;
 using System.Text.Json;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Configuration;
+using System.Threading;
 
 namespace Budgetr.Shared.Services;
 
 /// <summary>
 /// Implementation of time tracking service with local storage persistence.
 /// </summary>
-public class TimeTrackingService : ITimeTrackingService
+public class TimeTrackingService : ITimeTrackingService, IDisposable
 {
     private readonly IStorageService _storage;
     private readonly IMeterConfigurationService _meterConfig;
     private readonly ISettingsService _settingsService;
     private readonly INotificationService _notificationService;
+    private readonly IConfiguration _configuration;
     private readonly IStringLocalizer<Budgetr.Shared.Resources.Strings> _localizer;
+    private readonly Timer _activeMeterTimer;
     private TimeAccount _account = new TimeAccount();
     private const string StorageKey = "budgetr_account";
     public const int MaxMeters = 8;
+    private readonly int _notificationIntervalSeconds = 5;
     
     public TimeAccount Account => _account;
 
@@ -36,13 +41,25 @@ public class TimeTrackingService : ITimeTrackingService
     
     public event Action? OnStateChanged;
 
-    public TimeTrackingService(IStorageService storage, IMeterConfigurationService meterConfig, ISettingsService settingsService, INotificationService notificationService, IStringLocalizer<Budgetr.Shared.Resources.Strings> localizer)
+    public TimeTrackingService(
+        IStorageService storage, 
+        IMeterConfigurationService meterConfig, 
+        ISettingsService settingsService, 
+        INotificationService notificationService, 
+        IStringLocalizer<Budgetr.Shared.Resources.Strings> localizer,
+        IConfiguration configuration)
     {
         _storage = storage;
         _meterConfig = meterConfig;
         _settingsService = settingsService;
         _notificationService = notificationService;
         _localizer = localizer;
+        _configuration = configuration;
+        
+        _notificationIntervalSeconds = _configuration.GetValue<int>("TimeTracking:NotificationIntervalSeconds", 5);
+        if (_notificationIntervalSeconds <= 0) _notificationIntervalSeconds = 5;
+
+        _activeMeterTimer = new Timer(CheckActiveMeter, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
     }
 
     public TimeSpan GetCurrentBalance()
@@ -71,6 +88,8 @@ public class TimeTrackingService : ITimeTrackingService
         };
         
         _account.Events.Add(newEvent);
+        _activeMeterTimer.Change(TimeSpan.FromSeconds(_notificationIntervalSeconds), TimeSpan.FromSeconds(_notificationIntervalSeconds));
+        
         OnStateChanged?.Invoke();
         _ = SaveAsync();
         _ = _notificationService.NotifyAsync(
@@ -99,6 +118,7 @@ public class TimeTrackingService : ITimeTrackingService
         if (activeEvent != null)
         {
             activeEvent.EndTime = DateTimeOffset.UtcNow;
+            _activeMeterTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             OnStateChanged?.Invoke();
             _ = SaveAsync();
         }
@@ -262,6 +282,15 @@ public class TimeTrackingService : ITimeTrackingService
             }
         }
         
+        if (GetActiveEvent() != null)
+        {
+            _activeMeterTimer.Change(TimeSpan.FromSeconds(_notificationIntervalSeconds), TimeSpan.FromSeconds(_notificationIntervalSeconds));
+        }
+        else
+        {
+            _activeMeterTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        }
+        
         OnStateChanged?.Invoke();
         await SaveAsync();
     }
@@ -352,6 +381,15 @@ public class TimeTrackingService : ITimeTrackingService
             }
         }
 
+        if (GetActiveEvent() != null)
+        {
+            _activeMeterTimer.Change(TimeSpan.FromSeconds(_notificationIntervalSeconds), TimeSpan.FromSeconds(_notificationIntervalSeconds));
+        }
+        else
+        {
+            _activeMeterTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        }
+
         OnStateChanged?.Invoke();
         await SaveAsync();
     }
@@ -420,6 +458,8 @@ public class TimeTrackingService : ITimeTrackingService
         // Reset timeline period to default
         _account.TimelinePeriod = TimeSpan.FromHours(24);
         
+        _activeMeterTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        
         OnStateChanged?.Invoke();
         await SaveAsync();
     }
@@ -451,6 +491,23 @@ public class TimeTrackingService : ITimeTrackingService
             OnStateChanged?.Invoke();
             _ = SaveAsync();
         }
+    }
+
+    private void CheckActiveMeter(object? state)
+    {
+        var activeEvent = GetActiveEvent();
+        if (activeEvent != null)
+        {
+            _ = _notificationService.NotifyAsync(
+                _localizer["NotificationMeterActiveTitle"],
+                string.Format(_localizer["NotificationMeterActiveBody"], activeEvent.MeterName)
+            );
+        }
+    }
+
+    public void Dispose()
+    {
+        _activeMeterTimer?.Dispose();
     }
 }
 

@@ -547,4 +547,10 @@
   <data name="NotificationTimeularDisconnectedBody" xml:space="preserve">
     <value>Tu rastreador Timeular se ha desconectado.</value>
   </data>
+  <data name="NotificationMeterActiveTitle" xml:space="preserve">
+    <value>🔵 Medidor Activo</value>
+  </data>
+  <data name="NotificationMeterActiveBody" xml:space="preserve">
+    <value>Aún estás registrando '{0}'.</value>
+  </data>
 </root>

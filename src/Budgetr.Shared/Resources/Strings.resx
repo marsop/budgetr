@@ -550,4 +550,10 @@
   <data name="NotificationTimeularDisconnectedBody" xml:space="preserve">
     <value>Your Timeular tracker has been disconnected.</value>
   </data>
+  <data name="NotificationMeterActiveTitle" xml:space="preserve">
+    <value>🔵 Meter Active</value>
+  </data>
+  <data name="NotificationMeterActiveBody" xml:space="preserve">
+    <value>You are still tracking '{0}'.</value>
+  </data>
 </root>
