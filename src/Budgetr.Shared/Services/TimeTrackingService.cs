@@ -433,12 +433,6 @@ public class TimeTrackingService : ITimeTrackingService, IDisposable
             throw new ArgumentException("Meter name must be between 1 and 40 characters.");
         }
 
-        // Check for duplicate factor - REMOVED per user request
-        // if (_account.Meters.Any(m => Math.Abs(m.Factor - factor) < 0.001))
-        // {
-        //     throw new ArgumentException($"A meter with factor {factor} already exists.");
-        // }
-
         var newMeter = new Meter
         {
             Name = name.Trim(),
