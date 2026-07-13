@@ -170,14 +170,12 @@ public class TimeTrackingService : ITimeTrackingService, IDisposable
         // Get all events that overlap with the period
         var relevantEvents = _account.Events
             .Where(e => e.StartTime <= endTime && (e.EndTime ?? endTime) >= startTime)
-            .OrderBy(e => e.StartTime)
-            .ToList();
+            .OrderBy(e => e.StartTime);
         
         // Calculate balance before the period starts
         double runningBalance = 0;
         var eventsBefore = _account.Events
-            .Where(e => e.StartTime < startTime)
-            .ToList();
+            .Where(e => e.StartTime < startTime);
         
         foreach (var evt in eventsBefore)
         {
