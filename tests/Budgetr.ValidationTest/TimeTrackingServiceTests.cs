@@ -100,6 +100,52 @@ public class TimeTrackingServiceTests
     }
 
     [Fact]
+    public async Task RenameMeter_EmptyName_Throws()
+    {
+        var sut = await CreateLoadedServiceAsync();
+        var meter = sut.Account.Meters.First();
+
+        Assert.Throws<ArgumentException>(() => sut.RenameMeter(meter.Id, ""));
+        Assert.Throws<ArgumentException>(() => sut.RenameMeter(meter.Id, "   "));
+    }
+
+    [Fact]
+    public async Task RenameMeter_NameTooLong_Throws()
+    {
+        var sut = await CreateLoadedServiceAsync();
+        var meter = sut.Account.Meters.First();
+
+        var tooLongName = new string('A', 41);
+        Assert.Throws<ArgumentException>(() => sut.RenameMeter(meter.Id, tooLongName));
+    }
+
+    [Fact]
+    public async Task RenameMeter_ValidName_RenamesMeter()
+    {
+        var sut = await CreateLoadedServiceAsync();
+        var meter = sut.Account.Meters.First();
+
+        sut.RenameMeter(meter.Id, "New Name");
+
+        Assert.Equal("New Name", meter.Name);
+    }
+
+    [Fact]
+    public async Task RenameMeter_ActiveEvent_UpdatesEventMeterName()
+    {
+        var sut = await CreateLoadedServiceAsync();
+        var meter = sut.Account.Meters.First();
+        sut.ActivateMeter(meter.Id);
+
+        sut.RenameMeter(meter.Id, "Updated Name");
+
+        var activeEvent = sut.GetActiveEvent();
+        Assert.NotNull(activeEvent);
+        Assert.Equal("Updated Name", activeEvent.MeterName);
+        Assert.Equal("Updated Name", meter.Name);
+    }
+
+    [Fact]
     public async Task ActivateMeter_NoPreviousActive_CreatesActiveEvent()
     {
         var sut = await CreateLoadedServiceAsync();
